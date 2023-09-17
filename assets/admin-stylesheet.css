@@ -1,1 +1,7 @@
 .highlight-me{background:#fbf3d5;}
+#ab_test_triggers table input[type="text"], #ab_test_triggers table select{width:100%;}
+#ab_test_triggers table tbody tr td button[data-action="add"]{display:none;}
+#ab_test_triggers table tbody tr:last-child td button[data-action="add"]{display:inline-block;}
+
+#ab_test_subjects table.form-table thead tr th, #ab_test_subjects table.form-table tbody tr td{width:auto;}
+#ab_test_subjects table.form-table thead tr th:first-child, #ab_test_subjects table.form-table tbody tr td:first-child{width:40px;}

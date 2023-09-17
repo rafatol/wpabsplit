@@ -39,6 +39,7 @@ add_action('save_post', [WpAbSplit::class, 'save_post']);
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
 
 add_action('wp', [WpAbSplit::class, 'wp']);
+add_action('pre_get_posts', [WpAbSplit::class, 'pre_get_posts']);
 
 add_action('wp_ajax_nopriv_wpab_probe', [WpAbSplit::class, 'probe']);
 add_action('wp_ajax_wpab_probe', [WpAbSplit::class, 'probe']);
@@ -57,6 +58,17 @@ function WPAB_get_test_subjects($post_id)
 function WPAB_get_trigger_type($post_id)
 {
     $triggers = get_post_meta($post_id, 'wpab_trigger_type', true);
+
+    if(!$triggers){
+        return [];
+    }
+
+    return $triggers;
+}
+
+function WPAB_get_triggers($post_id)
+{
+    $triggers = get_post_meta($post_id, 'wpab_triggers', true);
 
     if(!$triggers){
         return [];

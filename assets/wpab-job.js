@@ -9,6 +9,16 @@ let wpabJob = {
         wpabJob.userId = wpab_vars.id;
         wpabJob.probeUrl = wpab_vars.probe_url;
 
+        jQuery.fn.isInViewport = function() {
+            var elementTop = jQuery(this).offset().top;
+            var elementBottom = elementTop + jQuery(this).outerHeight();
+
+            var viewportTop = jQuery(window).scrollTop();
+            var viewportBottom = viewportTop + jQuery(window).height();
+
+            return elementBottom > viewportTop && elementTop < viewportBottom;
+        };
+
         wpabJob.addTriggerEvents(wpab_vars.triggers);
 
         wpabJob.handshake();
@@ -18,26 +28,38 @@ let wpabJob = {
     addTriggerEvents: function(availableTriggers){
         jQuery.each(availableTriggers, function(triggerIdx, triggerData){
             if(triggerData.action == 'visible'){
-                /** @todo Checar se o elemento está visível no viewport do usuário */
+                jQuery(window).on('resize scroll', triggerData.trigger_selector, function(){
+                    if(jQuery(this).isInViewport()){
+                        wpabJob.registerTriggeredEvent(jQuery(this), triggerData);
+                    }
+                });
+
                 return;
             }
 
             jQuery(triggerData.trigger_selector).on(triggerData.js_event, function(){
-                let currentEl = jQuery(this);
-
-                let eventParams = {userAction: triggerData.action, selector: triggerData.trigger_selector};
-
-                if(currentEl.attr('id')){
-                    eventParams.id = currentEl.attr('id');
-                }
-
-                if(currentEl.data(triggerData.description_selector)){
-                    eventParams.description = currentEl.data(triggerData.description_selector);
-                }
-
-                wpabJob.doPost(eventParams);
+                wpabJob.registerTriggeredEvent(jQuery(this), triggerData);
             });
         });
+    },
+    registerTriggeredEvent: function(currentEl, triggerData){
+        let eventParams = {userAction: triggerData.action, selector: triggerData.trigger_selector};
+
+        if(currentEl.attr('id')){
+            eventParams.id = currentEl.attr('id');
+        }
+
+        if(undefined !== triggerData.description_selector){
+            if(currentEl.data(triggerData.description_selector)){
+                eventParams.description = currentEl.data(triggerData.description_selector);
+            }
+        }
+
+        if(undefined !== triggerData.description){
+            eventParams.description = triggerData.description;
+        }
+
+        wpabJob.doPost(eventParams);
     },
     handshake: function(){
         console.log('Hello there');

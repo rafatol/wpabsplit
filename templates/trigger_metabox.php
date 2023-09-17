@@ -74,5 +74,55 @@
         </div>
     </div>
     <hr>
-
+    <table class="form-table">
+        <thead>
+            <tr>
+                <th><?=__('Selector')?></th>
+                <th><?=__('Trigger')?></th>
+                <th><?=__('Description')?></th>
+                <th><?=__('Actions')?></th>
+            </tr>
+        </thead>
+        <tbody>
+<?php
+    if(is_array($triggers) && count($triggers)):
+        foreach($triggers as $idx => $t):
+?>
+            <tr>
+                <td><input type="text" value="<?=$t['selector']?>" name="trigger[<?=$idx?>][selector]" id="trigger-<?=$idx?>-selector" data-name="trigger[@][selector]" data-id="trigger-@-selector" data-invalid="<?=__('%s is not a valid selector')?>" required></td>
+                <td>
+                    <select name="trigger[<?=$idx?>][type]" id="trigger-<?=$idx?>-type" data-name="trigger[@][type]" data-id="trigger-@-type" required>
+                        <option value="click"<?=(($t['type'] == 'click')?' selected':'')?>><?=__('Click')?></option>
+                        <option value="submit"<?=(($t['type'] == 'submit')?' selected':'')?>><?=__('Submit')?></option>
+                        <option value="mousein"<?=(($t['type'] == 'mousein')?' selected':'')?>><?=__('Mouse In')?></option>
+                        <option value="mouseout"<?=(($t['type'] == 'mouseout')?' selected':'')?>><?=__('Mouse Out')?></option>
+                        <option value="visible"<?=(($t['type'] == 'visible')?' selected':'')?>><?=__('Visible')?></option>
+                    </select>
+                </td>
+                <td><input type="text" value="<?=$t['selector']?>" name="trigger[<?=$idx?>][description]" id="trigger-<?=$idx?>-description" data-name="trigger[@][description]" data-id="trigger-@-description" required></td>
+                <td><button type="button" data-action="add"><?=__('Add')?></button> <button type="button" data-action="delete"><?=__('Remove')?></button></td>
+            </tr>
+<?php
+        endforeach;
+    else:
+?>
+            <tr>
+                <td><input type="text" name="trigger[0][selector]" id="trigger-0-selector" data-name="trigger[@][selector]" data-id="trigger-@-selector" data-invalid="<?=__('%s is not a valid selector')?>" required></td>
+                <td>
+                    <select name="trigger[0][type]" id="trigger-0-type" data-name="trigger[@][type]" data-id="trigger-@-type" required>
+                        <option value="click"><?=__('Click')?></option>
+                        <option value="submit"><?=__('Submit')?></option>
+                        <option value="mousein"><?=__('Mouse In')?></option>
+                        <option value="mouseout"><?=__('Mouse Out')?></option>
+                        <option value="visible"><?=__('Visible')?></option>
+                    </select>
+                </td>
+                <td><input type="text" name="trigger[0][description]" id="trigger-0-description" data-name="trigger[@][description]" data-id="trigger-@-description" required></td>
+                <td><button type="button" data-action="add"><?=__('Add')?></button> <button type="button" data-action="delete"><?=__('Remove')?></button></td>
+            </tr>
+<?php
+    endif;
+?>
+        </tbody>
+    </table>
 </div>
