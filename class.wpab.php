@@ -513,6 +513,10 @@ SQL;
 
 		if($post->post_type == WPAB_POST_TYPE){
 			$actions = ['wpab_report' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?page=wpab_report&post=' . $post->ID), esc_attr(__('Test Report')), __('Test Report'))] + $actions;
+
+            if(isset($actions['view'])){
+                unset($actions['view']);
+            }
 		}
 
 		return $actions;
