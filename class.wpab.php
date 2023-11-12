@@ -283,7 +283,7 @@ SQL;
     {
         global $post;
 
-        if(in_array($hook, ['post-new.php', 'post.php']) && $post->post_type == WPAB_POST_TYPE){
+        if(in_array($hook, ['post-new.php', 'post.php']) && $post && $post->post_type == WPAB_POST_TYPE){
             wp_enqueue_style('wpab-admin-toast-css', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.css', [], '1.3.2');
             wp_enqueue_script('wpab-admin-toast-js', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.js', ['jquery'], '1.3.2', true);
 
@@ -315,7 +315,7 @@ SQL;
 			}
         }
 
-		if($hook == 'edit.php' && $post->post_type == WPAB_POST_TYPE){
+		if($hook == 'edit.php' && $post && $post->post_type == WPAB_POST_TYPE){
             wp_enqueue_style('wpab-admin-posts-style', plugin_dir_url(__FILE__) . 'assets/admin-posts-stylesheet.css', [], WPAB_VERSION);
             wp_enqueue_script('wpab-admin-posts-script', plugin_dir_url(__FILE__) . 'assets/admin-posts-scripts.js', ['jquery'], WPAB_VERSION, true);
 		}
@@ -351,7 +351,7 @@ SQL;
     public static function pre_get_posts($wp)
     {
         if(is_singular() && !isset($wp->query_vars['tempered_query'])){
-			if($wp->query_vars['post_type'] === NULL && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
+			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
 				$currentPageId = $wp->queried_object->ID;
 
 				$queryTest = new WP_Query([
