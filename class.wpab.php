@@ -351,7 +351,26 @@ SQL;
     public static function pre_get_posts($wp)
     {
         if(is_singular() && !isset($wp->query_vars['tempered_query'])){
-			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
+			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] == WPAB_POST_TYPE){
+				$queryArgs = [
+					'name' => $wp->query_vars['name'],
+					'post_type' => WPAB_POST_TYPE,
+					'post_status' => 'publish',
+					'numberposts' => 1,
+					'tempered_query' => true
+				];
+
+				$testPostResult = get_posts($queryArgs);
+
+				if(count($testPostResult)){
+					$controlPage = WPAB_get_control($testPostResult[0]->ID);
+
+					wp_redirect(get_permalink($controlPage));
+					die();
+				}
+			}
+
+			if((!isset($wp->query_vars['post_type']) || (isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL)) && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
 				$currentPageId = $wp->queried_object->ID;
 
 				$queryTest = new WP_Query([
