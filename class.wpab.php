@@ -675,13 +675,14 @@ SQL;
 						$dataPoint = ['indexLabel' => (($subject == 'control')?__('Control'):__('Challenger')), 'y' => 0];
 
 						if(!$subjectData['sample']){
-							$emptyData++;
-
 							$resultArray[$platform][$subject]['conversion_rate'] = 0;
 							$chartData[$platform]['dataPoints'][] = $dataPoint;
-
-							continue;
 						}
+
+                        if(!$subjectData['conversion']){
+                            $emptyData++;
+                            continue;
+                        }
 
 						$resultArray[$platform][$subject]['conversion_rate'] = $dataPoint['y'] = (($subjectData['conversion'] / $subjectData['sample']) * 100);
 						$chartData[$platform]['dataPoints'][] = $dataPoint;
