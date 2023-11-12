@@ -52,11 +52,13 @@ add_action('wp_ajax_nopriv_wpab_probe', [WpAbSplit::class, 'probe']);
 add_action('wp_ajax_wpab_probe', [WpAbSplit::class, 'probe']);
 
 add_action('admin_action_wpab_report', [WpAbSplit::class, 'report']);
+add_action('post_action_toggle_test_status', [WpAbSplit::class, 'toggle_test_status']);
 
 add_filter('post_row_actions', [WpAbSplit::class, 'post_row_actions'], 10, 2);
 add_filter('manage_wpab_test_posts_columns', [WpAbSplit::class, 'manage_wpab_test_posts_columns']);
 add_action('manage_wpab_test_posts_custom_column', [WpAbSplit::class, 'manage_wpab_test_posts_custom_column'], 10, 2);
 add_filter('manage_edit-wpab_test_sortable_columns', [WpAbSplit::class, 'manage_edit_wpab_test_sortable_columns']);
+add_filter('display_post_states', [WpAbSplit::class, 'display_post_states'], 10, 2);
 
 add_action('restrict_manage_posts', [WpAbSplit::class, 'restrict_manage_posts']);
 add_filter('parse_query', [WpAbSplit::class, 'parse_query']);

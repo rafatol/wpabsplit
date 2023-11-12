@@ -512,7 +512,26 @@ SQL;
 		global $post;
 
 		if($post->post_type == WPAB_POST_TYPE){
-			$actions = ['wpab_report' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?page=wpab_report&post=' . $post->ID), esc_attr(__('Test Report')), __('Test Report'))] + $actions;
+            $controlPage = WPAB_get_control($post->ID);
+            $hypotesisPage = WPAB_get_hypothesis($post->ID);
+
+            if($controlPage && $hypotesisPage){
+                $isCompleted = get_post_meta($post->ID, 'wpab_completed', true);
+
+                if(!$isCompleted){
+                    if(in_array($post->post_status, ['paused', 'draft', 'pending', 'future', 'private'])){
+                        $actions = ['wpab_resume' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?post=' . $post->ID . '&action=toggle_test_status'), esc_attr(__('Resume')), __('Resume'))] + $actions;
+                    } else {
+                        $actions = ['wpab_pause' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?post=' . $post->ID . '&action=toggle_test_status'), esc_attr(__('Pause')), __('Pause'))] + $actions;
+                    }
+                }
+
+                $actions = ['wpab_report' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?page=wpab_report&post=' . $post->ID), esc_attr(__('Test Report')), __('Test Report'))] + $actions;
+            }
+
+            if(isset($actions['inline hide-if-no-js'])){
+                unset($actions['inline hide-if-no-js']);
+            }
 
             if(isset($actions['view'])){
                 unset($actions['view']);
@@ -808,6 +827,14 @@ SQL;
 			$post = get_post($post_id);
 
 			if(in_array($post->post_status, ['paused', 'draft', 'pending', 'future', 'private'])){
+                $controlPage = WPAB_get_control($post_id);
+                $hypotesisPage = WPAB_get_hypothesis($post_id);
+
+                if(!$controlPage || !$hypotesisPage){
+                    echo __('Draft');
+                    return;
+                }
+
 				echo __('Paused');
 				return;
 			}
@@ -896,5 +923,38 @@ SQL;
 
 		return $views;
 	}
+
+    public static function toggle_test_status($post_id)
+    {
+        $post = get_post($post_id);
+
+        if($post->post_status == 'publish'){
+            wp_update_post(['ID' => $post_id, 'post_status' => 'pending']);
+        } else {
+            $controlPage = WPAB_get_control($post_id);
+            $hypothesisPage = WPAB_get_hypothesis($post_id);
+
+            if($controlPage && $hypothesisPage){
+                wp_update_post(['ID' => $post_id, 'post_status' => 'publish']);
+            }
+        }
+
+        wp_redirect(admin_url('edit.php?post_type=' . WPAB_POST_TYPE));
+        die();
+    }
+
+    public static function display_post_states($states, $post)
+    {
+        if($post->post_type == WPAB_POST_TYPE && isset($states['pending'])){
+            $controlPage = WPAB_get_control($post->ID);
+            $hypothesisPage = WPAB_get_hypothesis($post->ID);
+
+            if($controlPage && $hypothesisPage){
+                unset($states['pending']);
+            }
+        }
+
+        return $states;
+    }
 
 }
