@@ -1,0 +1,34 @@
+{
+  "name": "bentools/split-test-analyzer",
+  "description": "Bayesian probability calculator for split testing / AB testing.",
+  "keywords": ["split test", "analyzer", "bayesian probability", "bayesian probabilities", "bayesian", "bayes", "ab test", "ab testing", "split testing"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Beno!t POLASZEK",
+      "email": "bpolaszek@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "BenTools\\SplitTestAnalyzer\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BenTools\\SplitTestAnalyzer\\Tests\\": "tests"
+    },
+    "files": [
+      "vendor/symfony/var-dumper/Resources/functions/dump.php"
+    ]
+  },
+  "require-dev": {
+    "phpunit/phpunit": "@stable",
+    "squizlabs/php_codesniffer": "@stable",
+    "satooshi/php-coveralls": "@stable",
+    "symfony/var-dumper": "^3.3"
+  }
+}

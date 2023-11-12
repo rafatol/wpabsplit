@@ -1,0 +1,3 @@
+.wpab-progress-bar{position:relative;width:100%;height:14px;background:#dedede;margin:0 0 4px;}
+.wpab-progress-bar .progress{position:absolute;top:0;left:0;bottom:0;width:0;transition:all 1s;background:#afafaf;}
+.wpab-progress-bar + p{font-size:0.9em!important;margin:0!important;}

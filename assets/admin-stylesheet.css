@@ -1,7 +1,40 @@
-.highlight-me{background:#fbf3d5;}
-#ab_test_triggers table input[type="text"], #ab_test_triggers table select{width:100%;}
-#ab_test_triggers table tbody tr td button[data-action="add"]{display:none;}
-#ab_test_triggers table tbody tr:last-child td button[data-action="add"]{display:inline-block;}
+.option-group{border-bottom:1px dashed #666;margin-bottom:1em;padding-bottom:1em;}
+.option-group input{width:100%;}
+.option-group label{font-weight:bold;font-size:0.9em;margin-bottom:0.3em;display:inline-block;}
+.option-group p{font-size:0.8em;}
+.option-group p:last-child{margin-bottom:0;}
 
-#ab_test_subjects table.form-table thead tr th, #ab_test_subjects table.form-table tbody tr td{width:auto;}
-#ab_test_subjects table.form-table thead tr th:first-child, #ab_test_subjects table.form-table tbody tr td:first-child{width:40px;}
+.postbox .inside .option-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+
+select#wpab_control_page + .select2, select#wpab_hypothesis_page + .select2{width:100%!important;}
+.form-group{}
+.form-group > label{display:block;margin-bottom:0.2rem;}
+.form-group > [name]{margin-bottom:0.2rem;}
+.form-group > p{margin:0 0 1rem;font-size:0.9em;}
+
+#ab_test_triggers [name]{width:100%;}
+
+.form-group .input-group{position:relative;display:table;border-collapse:separate;}
+.form-group .input-group [name], .form-group .input-group .input-group-btn{display:table-cell;}
+.form-group .input-group .input-group-btn{position:relative;font-size:0;white-space:nowrap;width:1%;vertical-align:middle;}
+.form-group .input-group .input-group-btn button{margin-left:-1px;z-index:2;background:#2271b1;border:1px solid #2271b1;color:#fff;height:30px;border-radius:0 3px 3px 0;cursor:pointer;}
+
+.more-info .hidden-content{border:1px dashed #999;background:#fafafa;padding:15px;}
+.more-info .hidden-content:not(.hidden){margin-top:10px;}
+.more-info .hidden-content ul{margin:0;}
+.more-info .hidden-content li{border-bottom:1px solid #eaeaea;padding-bottom:6px;}
+.more-info .hidden-content li:last-child{border-bottom:none;padding-bottom:0;}
+.more-info .hidden-content li p{margin:0 0 1em;}
+.more-info .hidden-content li p:last-child{margin-bottom:0;}
+
+.side-by-side{display:flex;}
+
+.wpab-progress-bar{position:relative;width:100%;height:14px;background:#dedede;margin:0 0 4px;}
+.wpab-progress-bar .progress{position:absolute;top:0;left:0;bottom:0;width:0;transition:all 1s;background:#afafaf;}
+.wpab-progress-bar + p{font-size:0.9em!important;margin:0!important;}
+
+.wpab-report-shortcut{padding:15px 0 0;}
+.wpab-report-shortcut a{display:block;text-align:center;text-decoration:none;background:#2271b1;border:1px solid #2271b1;color:#fff;font-size:13px;border-radius:3px;padding:6px 12px;}
+.wpab-report-shortcut a:hover{background:#135e96;border-color:#135e96;}
+
+#edit-slug-box{opacity:0;width:0;height:0;overflow:hidden;min-height:auto;margin:0;}

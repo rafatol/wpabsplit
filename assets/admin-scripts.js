@@ -1,7 +1,37 @@
 var wpabsplit = {
     initialize: function(){
-        jQuery('select[name="trigger_type"]').on('change', wpabsplit.changeTriggerType);
-        jQuery('select[name="trigger_type"]').trigger('change');
+        let controlPageSelect = jQuery('select#wpab_control_page');
+        controlPageSelect.select2();
+        controlPageSelect.on('change.select2', wpabsplit.loadHypothesis);
+
+        jQuery('select#wpab_hypothesis_page').select2();
+
+        if(controlPageSelect.val()){
+            controlPageSelect.trigger('change');
+        }
+
+        if(jQuery('.wpab-progress-bar').length){
+            jQuery('.wpab-progress-bar').each(function(){
+                let currentEl = jQuery(this);
+                let currentVal = currentEl.data('percentage');
+
+                currentEl.find('.progress').css('width', currentVal + '%');
+            });
+        }
+
+        jQuery('button[data-action="toggle"]').on('click', function(e){
+            e.preventDefault();
+
+            let currentEl = jQuery(this);
+            let currentWrapper = jQuery(currentEl.data('target')).closest('.more-info');
+
+            if(currentWrapper.find('.hidden-content').hasClass('hidden')){
+                currentWrapper.find('.hidden-content').removeClass('hidden');
+                return;
+            }
+
+            currentWrapper.find('.hidden-content').addClass('hidden');
+        });
 
         jQuery('.more-info button').on('click', function(e){
             e.preventDefault();
@@ -16,20 +46,7 @@ var wpabsplit = {
             currentWrapper.find('.hidden-content').addClass('hidden');
         });
 
-        jQuery('#ab_test_triggers').on('click', 'button[data-action]', function(e){
-            let thisEl = jQuery(this);
-
-            switch (thisEl.data('action')) {
-                case 'delete':
-                        wpabsplit.deleteTrigger.call(this, e);
-                    break;
-                case 'add':
-                        wpabsplit.addTrigger.call(this, e);
-                    break;
-            }
-        });
-
-        jQuery('#ab_test_triggers').on('change', 'input[data-name="trigger[@][selector]"]', function(e){
+        jQuery('input[name="trigger_selector"]').on('change', function(e){
             let thisEl = jQuery(this);
 
             const isSelectorValid = ((dummyElement) =>
@@ -43,13 +60,47 @@ var wpabsplit = {
                 thisEl.val('').focus();
             }
         });
+
+        if(typeof wpab_sidebar !== 'undefined'){
+            jQuery.each(wpab_sidebar.custom_menu, function(elI, elV){
+                let newMenuItem = jQuery('<li><a href="' + elV.url + '">' + elV.label + '</a></li>');
+
+                if(typeof elV.add_after !== 'undefined'){
+                    jQuery(elV.add_after).after(newMenuItem);
+                    return;
+                }
+
+                if(typeof elV.add_before !== 'undefined'){
+                    jQuery(elV.add_before).after(newMenuItem);
+                    return;
+                }
+            });
+        }
+    },
+    loadHypothesis: function(e){
+        let currentEl = jQuery(this);
+        let currentVal = currentEl.val();
+
+        let targetSelect = jQuery('select#wpab_hypothesis_page');
+
+        jQuery.get(currentEl.data('probe'), {page_id: currentVal, current_id: jQuery('#post_ID').val(), method: 'hypothesis', action: 'wpab_probe'}, function(data){
+            targetSelect.html('');
+            jQuery.each(data, function(elI, elV){
+                targetSelect.append('<option value="' + ((null !== elV.id)?elV.id:'') + '"' + ((elV.selected)?' selected':'') + '>' + elV.label + '</option>');
+            });
+
+            targetSelect.trigger('change');
+        });
     },
     changeTriggerType: function(){
         let currentEl = jQuery(this);
 
         if(jQuery('[data-parent="' + currentEl.attr('name') + '"]').length){
             jQuery('[data-parent="' + currentEl.attr('name') + '"]').addClass('hidden');
+            jQuery('[data-parent="' + currentEl.attr('name') + '"] [name]').prop('required', false);
+
             jQuery('[data-parent="' + currentEl.attr('name') + '"][data-value="' + currentEl.val() + '"]').removeClass('hidden');
+            jQuery('[data-parent="' + currentEl.attr('name') + '"][data-value="' + currentEl.val() + '"] [name]').prop('required', true);
         }
     },
     addTrigger: function(e){

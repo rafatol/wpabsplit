@@ -1,0 +1,5 @@
+{
+    "require": {
+        "bentools/split-test-analyzer": "^1.1"
+    }
+}

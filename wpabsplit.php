@@ -27,6 +27,12 @@ define('WPAB_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('WPAB_POST_TYPE', 'wpab_test');
 define('WPAB_NONCE_KEY', 'wpab_nonce');
 
+define('WPAB_PLATFORM_SMALL', 'small');
+define('WPAB_PLATFORM_MEDIUM', 'medium');
+define('WPAB_PLATFORM_LARGE', 'large');
+
+define('WPAB_SESSION_NAME', 'wpab_session');
+
 require_once WPAB_PLUGIN_PATH . 'class.wpab.php';
 
 register_activation_hook(__FILE__, [WpAbSplit::class, 'plugin_activation']);
@@ -38,11 +44,24 @@ add_action('save_post', [WpAbSplit::class, 'save_post']);
 
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
 
-add_action('wp', [WpAbSplit::class, 'wp']);
 add_action('pre_get_posts', [WpAbSplit::class, 'pre_get_posts']);
+
+add_action('admin_menu', [WpAbSplit::class, 'admin_menu']);
 
 add_action('wp_ajax_nopriv_wpab_probe', [WpAbSplit::class, 'probe']);
 add_action('wp_ajax_wpab_probe', [WpAbSplit::class, 'probe']);
+
+add_action('admin_action_wpab_report', [WpAbSplit::class, 'report']);
+
+add_filter('post_row_actions', [WpAbSplit::class, 'post_row_actions'], 10, 2);
+add_filter('manage_wpab_test_posts_columns', [WpAbSplit::class, 'manage_wpab_test_posts_columns']);
+add_action('manage_wpab_test_posts_custom_column', [WpAbSplit::class, 'manage_wpab_test_posts_custom_column'], 10, 2);
+add_filter('manage_edit-wpab_test_sortable_columns', [WpAbSplit::class, 'manage_edit_wpab_test_sortable_columns']);
+
+add_action('restrict_manage_posts', [WpAbSplit::class, 'restrict_manage_posts']);
+add_filter('parse_query', [WpAbSplit::class, 'parse_query']);
+
+add_filter('views_edit-wpab_test', [WpAbSplit::class, 'views_edit_wpab_test']);
 
 function WPAB_get_test_subjects($post_id)
 {
@@ -55,24 +74,124 @@ function WPAB_get_test_subjects($post_id)
     return $test_subjects;
 }
 
-function WPAB_get_trigger_type($post_id)
+function WPAB_get_control($post_id)
 {
-    $triggers = get_post_meta($post_id, 'wpab_trigger_type', true);
+    $control_page = get_post_meta($post_id, 'wpab_control_page', true);
 
-    if(!$triggers){
-        return [];
+    if(!$control_page){
+        return false;
     }
 
-    return $triggers;
+    return $control_page;
 }
 
-function WPAB_get_triggers($post_id)
+function WPAB_get_control_color($post_id)
 {
-    $triggers = get_post_meta($post_id, 'wpab_triggers', true);
+	$control_page_color = get_post_meta($post_id, 'wpab_control_page_color', true);
 
-    if(!$triggers){
+	if(!$control_page_color){
+		return '#FF0000';
+	}
+
+	return $control_page_color;
+}
+
+function WPAB_get_hypothesis($post_id)
+{
+    $hypothesis = get_post_meta($post_id, 'wpab_hypothesis_page', true);
+
+    if(!$hypothesis){
+        return false;
+    }
+
+    return $hypothesis;
+}
+
+function WPAB_get_hypothesis_color($post_id)
+{
+    $hypothesis_color = get_post_meta($post_id, 'wpab_hypothesis_page_color', true);
+
+    if(!$hypothesis_color){
+        return '#0000FF';
+    }
+
+    return $hypothesis_color;
+}
+
+function WPAB_get_selector($post_id)
+{
+    $selector = get_post_meta($post_id, 'wpab_trigger_selector', true);
+
+    if(!$selector){
+        return null;
+    }
+
+    return $selector;
+}
+
+function WPAB_get_event($post_id)
+{
+    $event = get_post_meta($post_id, 'wpab_trigger_event', true);
+
+    if(!$event){
         return [];
     }
 
-    return $triggers;
+    return $event;
+}
+
+function WPAB_get_test_quantity($post_id, $default = 2)
+{
+    $test_quantity = get_post_meta($post_id, 'wpab_test_quantity', true);
+
+    if(!$test_quantity){
+        return $default;
+    }
+
+    return $test_quantity;
+}
+
+function WPAB_get_total_runs($post_id)
+{
+	$totalRuns = get_post_meta($post_id, 'wpab_runs', true);
+
+	if(!is_numeric($totalRuns)){
+		global $wpdb;
+
+		$executionsTableName = $wpdb->prefix . 'wpab_executions';
+
+		$checkQuery = <<<SQL
+SELECT COALESCE(COUNT(id), 0) AS runs FROM {$executionsTableName} WHERE test_id = {$post_id};
+SQL;
+
+		$checkResult = $wpdb->get_row($checkQuery);
+		$totalRuns = $checkResult->runs;
+
+		update_post_meta($post_id, 'wpab_runs', $totalRuns);
+	}
+
+
+	return $totalRuns;
+}
+
+function WPAB_get_progress($post_id)
+{
+	$progress = get_post_meta($post_id, 'wpab_progress', true);
+
+	if(!is_numeric($progress)){
+		$testQuantity = WPAB_get_test_quantity($post_id);
+		$testRuns = WPAB_get_total_runs($post_id);
+
+		$progress = ceil(($testRuns / $testQuantity) * 100);
+
+		update_post_meta($post_id, 'wpab_progress', $progress);
+	}
+
+	return $progress;
+}
+
+function WPAB_test_started($post_id)
+{
+	$totalRuns = WPAB_get_total_runs($post_id);
+	return ($totalRuns > 0);
 }

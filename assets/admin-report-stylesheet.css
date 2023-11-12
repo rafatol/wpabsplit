@@ -1,0 +1,29 @@
+#wpab-report{padding:25px 25px 0 0;}
+#wpab-report > h1{text-align:center;margin:0 0 15px;}
+#wpab-report .panel{border:1px solid #ddd;margin:0 0 20px;background:#fff;border-radius:4px;}
+#wpab-report .panel .panel-title{color:#333;border-bottom:1px solid #ddd;border-radius:3px 3px 0 0;background:#f5f5f5;padding:10px 15px;position:relative;}
+#wpab-report .panel .panel-title h5{margin:0;font-size:16px;color:inherit;}
+#wpab-report .panel .panel-title a.panel-action{position:absolute;right:15px;top:50%;transform:translateY(-50%);text-decoration:none;background:#fff;border:1px solid #a5a5a5;color:#666;padding:2px 6px;}
+#wpab-report .panel .panel-content{padding:15px;font-size:14px;}
+#wpab-report .panel .panel-content .table-wrapper{margin:0 -15px -15px;}
+#wpab-report .panel .panel-content.empty-result{padding:0;}
+#wpab-report .panel .panel-content.empty-result .table-wrapper{margin:0;}
+#wpab-report .panel .panel-content table{width:100%;border-spacing:0;border-collapse:collapse;}
+#wpab-report .panel .panel-content table th{text-align:left;padding:8px;font-size:0.8em;}
+#wpab-report .panel .panel-content table td{border:1px solid #ddd;padding:8px;}
+#wpab-report .panel .panel-content table td.uplift-cell{font-weight:bold;}
+#wpab-report .panel .panel-content table td.uplift-cell.baseline{color:#999;}
+#wpab-report .panel .panel-content table td.uplift-cell.uplift-positive{color:#44D62C;}
+#wpab-report .panel .panel-content table td.uplift-cell.uplift-negative{color:#f00;}
+#wpab-report .panel .panel-content table td.uplift-cell.uplift-none{color:#999;}
+#wpab-report .panel .panel-content table tr.winner-row td{background:#A2E4B8;}
+#wpab-report .panel .panel-content table tr.winner-row td.uplift-cell.uplift-positive{color:#009A17;}
+
+#wpab-report .panel .chart{width:80%;margin:0 auto 20px;height:400px;}
+
+#wpab-report .panel .panel-content.test-detail{}
+#wpab-report .panel .panel-content.test-detail p{margin:0 0 4px;}
+#wpab-report .panel .row{display:flex;}
+#wpab-report .panel .row .col{width:50%;}
+
+span.color-preview{display:inline-block;background:#000;width:10px;height:10px;margin-right:6px;}

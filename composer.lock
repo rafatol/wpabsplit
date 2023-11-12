@@ -1,0 +1,76 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "71b6a76c39aa68859788810dab662c0f",
+    "packages": [
+        {
+            "name": "bentools/split-test-analyzer",
+            "version": "1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bpolaszek/split-test-analyzer.git",
+                "reference": "e09f2dc72365266cc17fd691c2fed973dc376af9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bpolaszek/split-test-analyzer/zipball/e09f2dc72365266cc17fd691c2fed973dc376af9",
+                "reference": "e09f2dc72365266cc17fd691c2fed973dc376af9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "@stable",
+                "satooshi/php-coveralls": "@stable",
+                "squizlabs/php_codesniffer": "@stable",
+                "symfony/var-dumper": "^3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BenTools\\SplitTestAnalyzer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Beno!t POLASZEK",
+                    "email": "bpolaszek@gmail.com"
+                }
+            ],
+            "description": "Bayesian probability calculator for split testing / AB testing.",
+            "keywords": [
+                "AB Testing",
+                "ab test",
+                "analyzer",
+                "bayes",
+                "bayesian",
+                "bayesian probabilities",
+                "bayesian probability",
+                "split test",
+                "split testing"
+            ],
+            "support": {
+                "issues": "https://github.com/bpolaszek/split-test-analyzer/issues",
+                "source": "https://github.com/bpolaszek/split-test-analyzer/tree/1.1"
+            },
+            "time": "2017-12-01T10:26:49+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}

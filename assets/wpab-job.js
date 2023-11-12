@@ -49,16 +49,6 @@ let wpabJob = {
             eventParams.id = currentEl.attr('id');
         }
 
-        if(undefined !== triggerData.description_selector){
-            if(currentEl.data(triggerData.description_selector)){
-                eventParams.description = currentEl.data(triggerData.description_selector);
-            }
-        }
-
-        if(undefined !== triggerData.description){
-            eventParams.description = triggerData.description;
-        }
-
         wpabJob.doPost(eventParams);
     },
     handshake: function(){
