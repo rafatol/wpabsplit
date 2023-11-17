@@ -27,6 +27,8 @@ class WpAbSplit {
     {
         global $wpdb;
 
+	    self::executeOrder66();
+
         $charset_collate = $wpdb->get_charset_collate();
 
         /**
@@ -87,15 +89,24 @@ SQL;
     {
         global $wpdb;
 
-        $executionsTableName = $wpdb->prefix . 'wpab_executions';
-        $stepsTableName = $wpdb->prefix . 'wpab_steps';
+        self::executeOrder66();
 
-        $wpdb->query(sprintf('DROP TABLE IF EXISTS %s', $stepsTableName));
-        $wpdb->query(sprintf('DROP TABLE IF EXISTS %s', $executionsTableName));
+        delete_option('wpab_plugin_db_version');
+    }
 
-        $postType = WPAB_POST_TYPE;
+	public static function executeOrder66()
+	{
+		global $wpdb;
 
-        $postDeleteQuery = <<<SQL
+		$executionsTableName = $wpdb->prefix . 'wpab_executions';
+		$stepsTableName = $wpdb->prefix . 'wpab_steps';
+
+		$wpdb->query(sprintf('DROP TABLE IF EXISTS %s', $stepsTableName));
+		$wpdb->query(sprintf('DROP TABLE IF EXISTS %s', $executionsTableName));
+
+		$postType = WPAB_POST_TYPE;
+
+		$postDeleteQuery = <<<SQL
 DELETE a,b,c
     FROM wp_posts a
     LEFT JOIN wp_term_relationships b
@@ -105,10 +116,8 @@ DELETE a,b,c
     WHERE a.post_type = '{$postType}';
 SQL;
 
-        $wpdb->query($postDeleteQuery);
-
-        delete_option('wpab_plugin_db_version');
-    }
+		$wpdb->query($postDeleteQuery);
+	}
 
     public static function admin_init()
     {
