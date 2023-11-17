@@ -87,10 +87,7 @@ SQL;
 
     public static function plugin_deactivation()
     {
-        global $wpdb;
-
         self::executeOrder66();
-
         delete_option('wpab_plugin_db_version');
     }
 
