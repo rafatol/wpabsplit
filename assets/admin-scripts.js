@@ -61,6 +61,15 @@ var wpabsplit = {
             }
         });
 
+        jQuery('input[name="test_quantity"]').on('blur', function(e){
+            let currentEl = jQuery(this);
+            let currentValue = parseInt(currentEl.val());
+
+            if(currentValue % 2 != 0){
+                currentEl.val(currentValue + 1);
+            }
+        });
+
         if(typeof wpab_sidebar !== 'undefined'){
             jQuery.each(wpab_sidebar.custom_menu, function(elI, elV){
                 let newMenuItem = jQuery('<li><a href="' + elV.url + '">' + elV.label + '</a></li>');

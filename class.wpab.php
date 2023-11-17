@@ -161,6 +161,10 @@ SQL;
         }
 
         if(isset($_POST['test_quantity'])){
+			if($_POST['test_quantity'] % 2 != 0){
+				$_POST['test_quantity'] = $_POST['test_quantity'] + 1;
+			}
+
             update_post_meta($post_id, 'wpab_test_quantity', $_POST['test_quantity']);
 
 			delete_post_meta($post_id, 'wpab_runs');
