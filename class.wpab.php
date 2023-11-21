@@ -276,6 +276,7 @@ SQL;
 		$totalRuns = WPAB_get_total_runs($post->ID);
 
 		$reportUrl = admin_url('post.php?page=wpab_report&post=' . $post->ID);
+		$isCompleted = get_post_meta($post->ID, 'wpab_completed', true);
 
 		include WPAB_PLUGIN_PATH . 'templates/metabox/about.php';
 	}
@@ -518,9 +519,11 @@ SQL;
                     } else {
                         $actions = ['wpab_pause' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?post=' . $post->ID . '&action=toggle_test_status'), esc_attr(__('Pause')), __('Pause'))] + $actions;
                     }
-                }
 
-                $actions = ['wpab_report' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?page=wpab_report&post=' . $post->ID), esc_attr(__('Test Report')), __('Test Report'))] + $actions;
+	                $actions = ['wpab_report' => __('Test Report')] + $actions;
+                } else {
+                    $actions = ['wpab_report' => sprintf('<a href="%s" title="%s">%s</a>', admin_url('post.php?page=wpab_report&post=' . $post->ID), esc_attr(__('Test Report')), __('Test Report'))] + $actions;
+                }
             }
 
             if(isset($actions['inline hide-if-no-js'])){
@@ -598,6 +601,28 @@ SQL;
 
 	public static function report()
 	{
+		if(isset($_GET['page']) && $_GET['page'] == 'completed'){
+			$tests = new WP_Query([
+				'post_type' => WPAB_POST_TYPE,
+				'posts_per_page' => -1,
+				'post_status' => 'publish',
+				'order' => 'DESC',
+				'orderby' => 'date',
+				'meta_query' => [
+					[
+						'key' => 'wpab_completed',
+						'value' => 1,
+						'compare' => '='
+					]
+				]
+			]);
+
+
+			require WPAB_PLUGIN_PATH . 'templates/admin_page/report_list.php';
+
+			return;
+		}
+
 		$postId = $_GET['post'];
 
 		if(is_numeric($postId)){
@@ -846,6 +871,7 @@ SQL;
 
 	public static function admin_menu()
 	{
+		add_submenu_page('edit.php?post_type=' . WPAB_POST_TYPE, __('All Reports'), __('All Reports'), 'manage_options', 'completed', [WpAbSplit::class, 'report'], 1);
 		add_submenu_page(null, __('Test Report'), __('Test Report'), 'manage_options', 'wpab_report', [WpAbSplit::class, 'report']);
 	}
 

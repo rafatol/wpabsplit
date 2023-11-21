@@ -39,3 +39,5 @@ select#wpab_control_page + .select2, select#wpab_hypothesis_page + .select2{widt
 
 #edit-slug-box{opacity:0;width:0;height:0;overflow:hidden;min-height:auto;margin:0;}
 #misc-publishing-actions .misc-pub-section.misc-pub-post-status, #misc-publishing-actions .misc-pub-section.misc-pub-visibility, #minor-publishing-actions{display:none;}
+
+a.disabled{pointer-events:none;cursor:default;opacity:0.4}

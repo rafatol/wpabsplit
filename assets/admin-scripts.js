@@ -4,6 +4,10 @@ var wpabsplit = {
         controlPageSelect.select2();
         controlPageSelect.on('change.select2', wpabsplit.loadHypothesis);
 
+        jQuery('a.disabled').on('click', function(e){
+            e.preventDefault();
+        });
+
         jQuery('select#wpab_hypothesis_page').select2();
 
         if(controlPageSelect.val()){

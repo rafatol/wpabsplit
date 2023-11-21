@@ -197,3 +197,28 @@ function WPAB_test_started($post_id)
 	$totalRuns = WPAB_get_total_runs($post_id);
 	return ($totalRuns > 0);
 }
+
+/**
+ * @param $post_id
+ *
+ * @return DateTime
+ * @throws Exception
+ */
+function WPAB_get_test_last_run($post_id)
+{
+	global $wpdb;
+
+	$executionsTableName = $wpdb->prefix . 'wpab_executions';
+
+	$lastRunDateQuery = <<<SQL
+SELECT end_datetime FROM {$executionsTableName} WHERE test_id = {$post_id} ORDER BY end_datetime DESC LIMIT 1;
+SQL;
+
+	$lastRunDateResult = $wpdb->get_row($lastRunDateQuery);
+
+	if($lastRunDateResult){
+		return new DateTime($lastRunDateResult->end_datetime);
+	}
+
+	return false;
+}
