@@ -1,5 +1,7 @@
 <?php
 
+namespace WpAbSplit;
+
 /**
  * @package WpAbSplit
  */
@@ -884,7 +886,7 @@ SQL;
 		}
 	}
 
-	public static function parse_query(WP_Query $query)
+	public static function parse_query(\WP_Query $query)
 	{
 		global $pagenow;
 

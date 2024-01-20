@@ -3,6 +3,9 @@
  * @package WpAbSplit
  */
 
+use WpAbSplit\WpAbSplit as WpAbSplit;
+use WpAbSplit\Licence as Licence;
+
 /**
 Plugin Name:  WP A/B Split
 Plugin URI:   https://wpabsplit.com
@@ -33,7 +36,8 @@ define('WPAB_PLATFORM_LARGE', 'large');
 
 define('WPAB_SESSION_NAME', 'wpab_session');
 
-require_once WPAB_PLUGIN_PATH . 'class.wpab.php';
+require_once WPAB_PLUGIN_PATH . 'include/class.wpab.php';
+require_once WPAB_PLUGIN_PATH . 'include/class.license.php';
 
 register_activation_hook(__FILE__, [WpAbSplit::class, 'plugin_activation']);
 register_deactivation_hook(__FILE__, [WpAbSplit::class, 'plugin_deactivation']);
