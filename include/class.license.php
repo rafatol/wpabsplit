@@ -2,11 +2,11 @@
 
 namespace WpAbSplit;
 
-class Licence
+class License
 {
 
     const MOTHERSHIP = 'http://cometex/wplicense';
-    const SECRET_KEY = '659a0c7762ed21.13106511';
+    const SECRET_KEY = '65ac8a545ceb07.29393020';
 
     const LICENSE_KEY = 'wpabsplit_license_key';
 
@@ -43,6 +43,7 @@ class Licence
             $requestParams = [
                 'slm_action' => 'slm_activate',
                 'secret_key' => self::SECRET_KEY,
+                'registered_domain' => $_SERVER['HTTP_HOST'],
                 'license_key' => $licenseKey,
             ];
 
@@ -59,7 +60,7 @@ class Licence
                 return true;
             }
 
-            throw new \Exception($response->message);
+            throw new \LicenseException($response->message);
         }
 
         return false;
@@ -73,6 +74,7 @@ class Licence
             $requestParams = [
                 'slm_action' => 'slm_deactivate',
                 'secret_key' => self::SECRET_KEY,
+                'registered_domain' => $_SERVER['HTTP_HOST'],
                 'license_key' => $licenseKey,
             ];
 
@@ -91,7 +93,7 @@ class Licence
                 return true;
             }
 
-            throw new \Exception($response->message);
+            throw new \LicenseException($response->message);
         }
 
         return false;
@@ -100,6 +102,16 @@ class Licence
     public static function getLicenseKey()
     {
         return get_option(self::LICENSE_KEY);
+    }
+
+    public static function setLicenseKey($licenseKey)
+    {
+        if(empty($licenseKey)){
+            delete_option(self::LICENSE_KEY);
+            return;
+        }
+
+        update_option(self::LICENSE_KEY, $licenseKey);
     }
 
     private static function checkWithMotherShip($licenseKey)
@@ -119,6 +131,30 @@ class Licence
         $licenseData = json_decode(wp_remote_retrieve_body($response));
 
         /** @todo Verificar validade da licença */
+    }
+
+    public static function updateLicenseKey($licenseKey)
+    {
+        $currentLicenseKey = self::getLicenseKey();
+
+        /** Em caso de licença diferente, desativa a anterior e ativa a nova */
+        if($currentLicenseKey != $licenseKey){
+            if($currentLicenseKey){
+                try {
+                    self::deactivateLicense();
+                } catch(\LicenseException $e) {
+
+                }
+            }
+
+            self::setLicenseKey($licenseKey);
+
+            if($licenseKey){
+                return self::activateLicense();
+            }
+        }
+
+        return false;
     }
 
 }

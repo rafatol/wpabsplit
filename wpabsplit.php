@@ -5,6 +5,7 @@
 
 use WpAbSplit\WpAbSplit as WpAbSplit;
 use WpAbSplit\Licence as Licence;
+use WpAbSplit\LicenseException as LicenseException;
 
 /**
 Plugin Name:  WP A/B Split
@@ -38,12 +39,14 @@ define('WPAB_SESSION_NAME', 'wpab_session');
 
 require_once WPAB_PLUGIN_PATH . 'include/class.wpab.php';
 require_once WPAB_PLUGIN_PATH . 'include/class.license.php';
+require_once WPAB_PLUGIN_PATH . 'include/class.exception.php';
 
 register_activation_hook(__FILE__, [WpAbSplit::class, 'plugin_activation']);
 register_deactivation_hook(__FILE__, [WpAbSplit::class, 'plugin_deactivation']);
 
 add_action('init', [WpAbSplit::class, 'init']);
 add_action('admin_init', [WpAbSplit::class, 'admin_init']);
+add_action('admin_notices', [WpAbSplit::class, 'admin_notices']);
 add_action('save_post', [WpAbSplit::class, 'save_post']);
 
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
@@ -56,6 +59,7 @@ add_action('wp_ajax_nopriv_wpab_probe', [WpAbSplit::class, 'probe']);
 add_action('wp_ajax_wpab_probe', [WpAbSplit::class, 'probe']);
 
 add_action('admin_action_wpab_report', [WpAbSplit::class, 'report']);
+add_action('admin_action_wpab_settings', [WpAbSplit::class, 'settings']);
 add_action('post_action_toggle_test_status', [WpAbSplit::class, 'toggle_test_status']);
 
 add_filter('post_row_actions', [WpAbSplit::class, 'post_row_actions'], 10, 2);

@@ -20,6 +20,10 @@ class WpAbSplit {
 
             self::$initialized = true;
 
+            if(!License::isActivated()){
+                return;
+            }
+
             WpAbSplit::add_custom_post_type();
             WpAbSplit::add_custom_post_status();
         }
@@ -123,6 +127,13 @@ SQL;
         if(!self::$adminInitialized){
             self::$adminInitialized = true;
             WpAbSplit::add_custom_post_metaboxes();
+        }
+    }
+
+    public static function admin_notices()
+    {
+        if(!License::isActivated()){
+            include WPAB_PLUGIN_PATH . 'templates/admin_page/license_notice.php';
         }
     }
 
@@ -333,6 +344,10 @@ SQL;
             wp_enqueue_script('wpab-admin-posts-script', plugin_dir_url(__FILE__) . 'assets/admin-posts-scripts.js', ['jquery'], WPAB_VERSION, true);
 		}
 
+        if($hook == 'settings_page_wpab_settings'){
+            wp_enqueue_style('wpab-admin-settings-style', plugin_dir_url(__FILE__) . 'assets/admin-settings.css', [], WPAB_VERSION);
+        }
+
 
 		if($hook == 'admin_page_wpab_report'){
 			wp_enqueue_style('wpab-admin-report-style', plugin_dir_url(__FILE__) . 'assets/admin-report-stylesheet.css', [], WPAB_VERSION);
@@ -363,6 +378,10 @@ SQL;
 
     public static function pre_get_posts($wp)
     {
+        if(!License::isActivated()){
+            return $wp;
+        }
+
         if(is_singular() && !isset($wp->query_vars['tempered_query'])){
 			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] == WPAB_POST_TYPE){
 				$queryArgs = [
@@ -875,6 +894,8 @@ SQL;
 	{
 		add_submenu_page('edit.php?post_type=' . WPAB_POST_TYPE, __('All Reports'), __('All Reports'), 'manage_options', 'completed', [WpAbSplit::class, 'report'], 1);
 		add_submenu_page(null, __('Test Report'), __('Test Report'), 'manage_options', 'wpab_report', [WpAbSplit::class, 'report']);
+
+        add_submenu_page('options-general.php', __('WP A/B Split Settings'), __('WP A/B Split Settings'), 'manage_options', 'wpab_settings', [WpAbSplit::class, 'settings']);
 	}
 
 	public static function restrict_manage_posts()
@@ -977,6 +998,18 @@ SQL;
         }
 
         return $states;
+    }
+
+    public static function settings()
+    {
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if(isset($_POST[License::LICENSE_KEY])){
+                License::updateLicenseKey($_POST[License::LICENSE_KEY]);
+                wp_redirect(admin_url('options-general.php?page=wpab_settings'));
+            }
+        }
+
+        include WPAB_PLUGIN_PATH . 'templates/admin_page/settings.php';
     }
 
 }
