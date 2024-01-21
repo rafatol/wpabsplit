@@ -9,6 +9,7 @@ class License
     const SECRET_KEY = '65ac8a545ceb07.29393020';
 
     const LICENSE_KEY = 'wpabsplit_license_key';
+    const LICENSE_DATA = 'wpabsplit_license_data';
 
     /**
      * @return boolean
@@ -24,11 +25,15 @@ class License
                 return true;
             }
 
-            $remoteCheck = self::checkWithMotherShip($license_key);
+            try {
+                $remoteCheck = self::checkWithMotherShip($license_key);
 
-            if($remoteCheck){
-                update_option(md5($license_key), date('Y-m-d'));
-                return true;
+                if($remoteCheck){
+                    update_option(md5($license_key), date('Y-m-d'));
+                    return true;
+                }
+            } catch(\LicenseException $e) {
+
             }
         }
 
@@ -119,6 +124,7 @@ class License
         $requestParams = [
             'slm_action' => 'slm_check',
             'secret_key' => self::SECRET_KEY,
+            'registered_domain' => $_SERVER['HTTP_HOST'],
             'license_key' => $licenseKey,
         ];
 
@@ -130,7 +136,19 @@ class License
 
         $licenseData = json_decode(wp_remote_retrieve_body($response));
 
-        /** @todo Verificar validade da licença */
+        if($response->result == 'success'){
+            update_option(md5($licenseKey), date('Y-m-d'));
+            update_option(self::LICENSE_DATA, $licenseData);
+
+            return true;
+        }
+
+        delete_option(md5($licenseKey));
+        delete_option(self::LICENSE_DATA);
+
+        throw new \LicenseException($response->message);
+
+        return false;
     }
 
     public static function updateLicenseKey($licenseKey)
