@@ -9,6 +9,8 @@ class WpAbSplit {
     static $initialized = false;
     static $adminInitialized = false;
 
+	static $frontPageId = null;
+
     public static function init()
     {
         if(!self::$initialized){
@@ -359,6 +361,144 @@ SQL;
 		}
     }
 
+	public static function pre_option_page_on_front($defaultValue, $optionsName)
+	{
+		return 6;
+		global $wpdb;
+
+		if(is_admin()){
+			$query = <<<SQL
+SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = '{$optionsName}';
+SQL;
+
+			$result = $wpdb->get_row($query);
+
+			if($result){
+				return $result->option_value;
+			}
+
+			return $defaultValue;
+		}
+
+		if(self::$frontPageId){
+			return self::$frontPageId;
+		}
+
+		$query = <<<SQL
+SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = '{$optionsName}';
+SQL;
+
+		$result = $wpdb->get_row($query);
+
+		if($result){
+			$currentPageId = $result->option_value;
+
+			self::$ignorePrePost = true;
+
+			$queryTest = new WP_Query([
+				'post_type' => WPAB_POST_TYPE,
+				'posts_per_page' => -1,
+				'post_status' => 'publish',
+				'order' => 'DESC',
+				'orderby' => 'date',
+				'meta_query' => [
+					'relation' => 'AND',
+					[
+						'relation' => 'OR',
+						[
+							'key' => 'wpab_control_page',
+							'value' => $currentPageId,
+							'compare' => '='
+						],
+						[
+							'key' => 'wpab_hypothesis_page',
+							'value' => $currentPageId,
+							'compare' => '='
+						]
+					],
+					[
+						'relation' => 'OR',
+						[
+							'key' => 'wpab_completed',
+							'value' => 1,
+							'compare' => '!='
+						],
+						[
+							'key' => 'wpab_completed',
+							'compare' => 'NOT EXISTS'
+						]
+					]
+				],
+				'tempered_query' => true
+			]);
+
+			echo 'opa';exit;
+			self::$ignorePrePost = false;
+
+
+			if($queryTest->have_posts()){
+				$testPost = $queryTest->next_post();
+
+				$postsTableName = $wpdb->prefix . 'posts';
+				$executionsTableName = $wpdb->prefix . 'wpab_executions';
+
+				$testQuantity = WPAB_get_test_quantity($testPost->ID);
+				$testRuns = WPAB_get_total_runs($testPost->ID);
+
+				$controlPage = WPAB_get_control($testPost->ID);
+				$hypotesisPage = WPAB_get_hypothesis($testPost->ID);
+
+				if($testRuns >= $testQuantity){
+					self::$frontPageId = $controlPage;
+					return self::$frontPageId;
+				}
+
+				$test_subjects = [$controlPage, $hypotesisPage];
+				$subjectsCondition = implode(',', $test_subjects);
+
+				$sortQuery = <<<SQL
+SELECT p.ID, COUNT(e.subject_id) AS occurrences FROM {$postsTableName} AS p LEFT JOIN {$executionsTableName} AS e ON (p.ID = e.subject_id) WHERE p.ID IN ({$subjectsCondition}) GROUP BY e.subject_id ORDER BY occurrences ASC LIMIT 1;
+SQL;
+
+				$sortResult = $wpdb->get_col($sortQuery);
+				$sortedPostId = array_shift($sortResult);
+
+				self::$frontPageId = $sortedPostId;
+				return self::$frontPageId;
+			}
+		}
+
+		return $defaultValue;
+	}
+
+	public static function the_post(WP_Post $post, WP_Query $query)
+	{
+		if(isset($query->query_vars['tempered_query'])){
+			return;
+		}
+
+		if(is_front_page() && $post->post_type == 'page'){
+			$showOnFront = get_option('show_on_front');
+			$pageOnFront = get_option('page_on_front');
+
+			if($showOnFront == 'page' && $pageOnFront == $post->ID){
+				$queryTest = self::queryTestPost($post->ID);
+
+				if($queryTest->have_posts()){
+					$testPost = $queryTest->next_post();
+
+					$sortedPostId = self::prepareTestSubject($testPost);
+
+					if(false === $sortedPostId){
+						return;
+					}
+
+					self::testPostLoad($testPost->ID, $post->ID);
+				}
+			}
+		}
+	}
+
     public static function pre_get_posts($wp)
     {
         if(is_singular() && !isset($wp->query_vars['tempered_query'])){
@@ -384,112 +524,23 @@ SQL;
 			if((!isset($wp->query_vars['post_type']) || (isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL)) && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
 				$currentPageId = $wp->queried_object->ID;
 
-				$queryTest = new WP_Query([
-					'post_type' => WPAB_POST_TYPE,
-					'posts_per_page' => -1,
-					'post_status' => 'publish',
-					'order' => 'DESC',
-					'orderby' => 'date',
-					'meta_query' => [
-						'relation' => 'AND',
-						[
-							'relation' => 'OR',
-							[
-								'key' => 'wpab_control_page',
-								'value' => $currentPageId,
-								'compare' => '='
-							],
-							[
-								'key' => 'wpab_hypothesis_page',
-								'value' => $currentPageId,
-								'compare' => '='
-							]
-						],
-						[
-							'relation' => 'OR',
-							[
-								'key' => 'wpab_completed',
-								'value' => 1,
-								'compare' => '!='
-							],
-							[
-								'key' => 'wpab_completed',
-								'compare' => 'NOT EXISTS'
-							]
-						]
-					],
-					'tempered_query' => true
-				]);
+				$queryTest = self::queryTestPost($currentPageId);
 
 				if($queryTest->have_posts()){
-					global $wpdb;
-
 					$testPost = $queryTest->next_post();
 
-					$postsTableName = $wpdb->prefix . 'posts';
-					$executionsTableName = $wpdb->prefix . 'wpab_executions';
-
-					$testQuantity = WPAB_get_test_quantity($testPost->ID);
-					$testRuns = WPAB_get_total_runs($testPost->ID);
-
 					$controlPage = WPAB_get_control($testPost->ID);
-					$hypotesisPage = WPAB_get_hypothesis($testPost->ID);
 
-					if($testRuns >= $testQuantity){
+					$sortedPostId = self::prepareTestSubject($testPost);
+
+					if(false === $sortedPostId){
 						$wp->queried_object = get_post($controlPage);
 						$wp->queried_object_id = $controlPage;
 
 						return $wp;
 					}
 
-					/** MobileDetect */
-					require_once WPAB_PLUGIN_PATH . 'trd_party/Mobile_Detect.php';
-
-					$test_subjects = [$controlPage, $hypotesisPage];
-
-					$subjectsCondition = implode(',', $test_subjects);
-
-					$mobileDetect = new Mobile_Detect();
-
-					$clientPlatform = WPAB_PLATFORM_LARGE;
-					$clientUserAgent = $mobileDetect->getUserAgent();
-
-					if($mobileDetect->isMobile()){
-						$clientPlatform = WPAB_PLATFORM_SMALL;
-					}
-
-					if($mobileDetect->isTablet()){
-						$clientPlatform = WPAB_PLATFORM_MEDIUM;
-					}
-
-					$sortQuery = <<<SQL
-SELECT p.ID, COUNT(e.subject_id) AS occurrences FROM {$postsTableName} AS p LEFT JOIN {$executionsTableName} AS e ON (p.ID = e.subject_id) WHERE p.ID IN ({$subjectsCondition}) GROUP BY e.subject_id ORDER BY occurrences ASC LIMIT 1;
-SQL;
-
-					$sortResult = $wpdb->get_col($sortQuery);
-					$sortedPostId = array_shift($sortResult);
-
-					wp_enqueue_script('wpab-job', plugin_dir_url(__FILE__) . 'assets/wpab-job.js', ['jquery'], WPAB_VERSION, true);
-
-					$pluginVars = ['id' => uniqid('wpab_', true), 'test_id' => $testPost->ID, 'subject_id' => $sortedPostId, 'probe_url' => admin_url('admin-ajax.php'), 'triggers' => []];
-
-					/** Registrando no banco o início dos testes */
-					$startQuery = <<<SQL
-INSERT INTO {$executionsTableName} (id, client_platform, client_user_agent, start_datetime, test_id, subject_id) VALUES ('{$pluginVars['id']}', '{$clientPlatform}', '{$clientUserAgent}', NOW(), {$pluginVars['test_id']}, {$pluginVars['subject_id']});
-SQL;
-
-					$wpdb->query($startQuery);
-
-					$pluginVars['triggers'][] = ['action' => WPAB_get_event($testPost->ID), 'js_event' => WPAB_get_event($testPost->ID), 'trigger_selector' => WPAB_get_selector($testPost->ID)];
-
-					wp_localize_script('wpab-job', 'wpab_vars', $pluginVars);
-
-					/** Salvando o progresso do teste em meta-data */
-					update_post_meta($testPost->ID, 'wpab_runs', ($testRuns + 1));
-					update_post_meta($testPost->ID, 'wpab_progress', ceil((($testRuns + 1) / $testQuantity) * 100));
-
-					/** Flag indicando situação final */
-					update_post_meta($testPost->ID, 'wpab_completed', (($testRuns + 1 >= $testQuantity)?1:0));
+					self::testPostLoad($testPost->ID, $sortedPostId);
 
 					$wp->queried_object = get_post($sortedPostId);
 					$wp->queried_object_id = $sortedPostId;
@@ -976,5 +1027,150 @@ SQL;
 
         return $states;
     }
+
+	private static function queryTestPost($postId)
+	{
+		return new WP_Query([
+			'post_type' => WPAB_POST_TYPE,
+			'posts_per_page' => 1,
+			'post_status' => 'publish',
+			'order' => 'DESC',
+			'orderby' => 'date',
+			'meta_query' => [
+				'relation' => 'AND',
+				[
+					'relation' => 'OR',
+					[
+						'key' => 'wpab_control_page',
+						'value' => $postId,
+						'compare' => '='
+					],
+					[
+						'key' => 'wpab_hypothesis_page',
+						'value' => $postId,
+						'compare' => '='
+					]
+				],
+				[
+					'relation' => 'OR',
+					[
+						'key' => 'wpab_completed',
+						'value' => 1,
+						'compare' => '!='
+					],
+					[
+						'key' => 'wpab_completed',
+						'compare' => 'NOT EXISTS'
+					]
+				]
+			],
+			'tempered_query' => true
+		]);
+	}
+
+	private static function prepareTestSubject(WP_Post $post)
+	{
+		global $wpdb;
+
+		$postsTableName = $wpdb->prefix . 'posts';
+		$executionsTableName = $wpdb->prefix . 'wpab_executions';
+
+		$testQuantity = WPAB_get_test_quantity($post->ID);
+		$testRuns = WPAB_get_total_runs($post->ID);
+
+		$controlPage = WPAB_get_control($post->ID);
+		$hypotesisPage = WPAB_get_hypothesis($post->ID);
+
+		if($testRuns >= $testQuantity){
+			self::updateStaticPage($controlPage, $hypotesisPage);
+			return false;
+		}
+
+		$test_subjects = [$controlPage, $hypotesisPage];
+
+		$subjectsCondition = implode(',', $test_subjects);
+
+		$sortQuery = <<<SQL
+SELECT p.ID, COUNT(e.subject_id) AS occurrences FROM {$postsTableName} AS p LEFT JOIN {$executionsTableName} AS e ON (p.ID = e.subject_id) WHERE p.ID IN ({$subjectsCondition}) GROUP BY e.subject_id ORDER BY occurrences ASC LIMIT 1;
+SQL;
+
+		$sortResult = $wpdb->get_col($sortQuery);
+		$sortedPostId = array_shift($sortResult);
+
+		/** Salvando o progresso do teste em meta-data */
+		update_post_meta($post->ID, 'wpab_runs', ($testRuns + 1));
+		update_post_meta($post->ID, 'wpab_progress', ceil((($testRuns + 1) / $testQuantity) * 100));
+
+		/** Flag indicando situação final */
+		update_post_meta($post->ID, 'wpab_completed', (($testRuns + 1 >= $testQuantity)?1:0));
+
+		self::updateStaticPage($controlPage, $hypotesisPage, $sortedPostId);
+
+		return $sortedPostId;
+	}
+
+	private static function testPostLoad($testId, $subjectId)
+	{
+		global $wpdb;
+
+		$executionsTableName = $wpdb->prefix . 'wpab_executions';
+
+		/** MobileDetect */
+		require_once WPAB_PLUGIN_PATH . 'trd_party/Mobile_Detect.php';
+
+		$mobileDetect = new Mobile_Detect();
+
+		$clientPlatform = WPAB_PLATFORM_LARGE;
+		$clientUserAgent = $mobileDetect->getUserAgent();
+
+		if($mobileDetect->isMobile()){
+			$clientPlatform = WPAB_PLATFORM_SMALL;
+		}
+
+		if($mobileDetect->isTablet()){
+			$clientPlatform = WPAB_PLATFORM_MEDIUM;
+		}
+
+		wp_enqueue_script('wpab-job', plugin_dir_url(__FILE__) . 'assets/wpab-job.js', ['jquery'], WPAB_VERSION, true);
+
+		$pluginVars = ['id' => uniqid('wpab_', true), 'test_id' => $testId, 'subject_id' => $subjectId, 'probe_url' => admin_url('admin-ajax.php'), 'triggers' => []];
+
+		/** Registrando no banco o início dos testes */
+		$startQuery = <<<SQL
+INSERT INTO {$executionsTableName} (id, client_platform, client_user_agent, start_datetime, test_id, subject_id) VALUES ('{$pluginVars['id']}', '{$clientPlatform}', '{$clientUserAgent}', NOW(), {$pluginVars['test_id']}, {$pluginVars['subject_id']});
+SQL;
+
+		$wpdb->query($startQuery);
+
+		$pluginVars['triggers'][] = ['action' => WPAB_get_event($testId), 'js_event' => WPAB_get_event($testId), 'trigger_selector' => WPAB_get_selector($testId)];
+
+		wp_localize_script('wpab-job', 'wpab_vars', $pluginVars);
+	}
+
+	private static function updateStaticPage($controlPageId, $hypotesisPageId, $sortedValue = null)
+	{
+		$showOnFront = get_option('show_on_front');
+		$pageOnFront = get_option('page_on_front');
+
+		if($showOnFront != 'page'){
+			return;
+		}
+
+		if(!in_array($pageOnFront, [$controlPageId, $hypotesisPageId])){
+			return;
+		}
+
+		if(null !== $sortedValue){
+			if($sortedValue == $controlPageId){
+				update_option('page_on_front', $hypotesisPageId);
+				return;
+			}
+
+			update_option('page_on_front', $controlPageId);
+			return;
+		}
+
+		update_option('page_on_front', $controlPageId);
+	}
 
 }
