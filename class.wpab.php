@@ -9,8 +9,6 @@ class WpAbSplit {
     static $initialized = false;
     static $adminInitialized = false;
 
-	static $frontPageId = null;
-
     public static function init()
     {
         if(!self::$initialized){
@@ -360,116 +358,6 @@ SQL;
 			wp_localize_script('wpab-admin-report-script', 'wpab_sidebar', $sidebarVars);
 		}
     }
-
-	public static function pre_option_page_on_front($defaultValue, $optionsName)
-	{
-		return 6;
-		global $wpdb;
-
-		if(is_admin()){
-			$query = <<<SQL
-SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = '{$optionsName}';
-SQL;
-
-			$result = $wpdb->get_row($query);
-
-			if($result){
-				return $result->option_value;
-			}
-
-			return $defaultValue;
-		}
-
-		if(self::$frontPageId){
-			return self::$frontPageId;
-		}
-
-		$query = <<<SQL
-SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = '{$optionsName}';
-SQL;
-
-		$result = $wpdb->get_row($query);
-
-		if($result){
-			$currentPageId = $result->option_value;
-
-			self::$ignorePrePost = true;
-
-			$queryTest = new WP_Query([
-				'post_type' => WPAB_POST_TYPE,
-				'posts_per_page' => -1,
-				'post_status' => 'publish',
-				'order' => 'DESC',
-				'orderby' => 'date',
-				'meta_query' => [
-					'relation' => 'AND',
-					[
-						'relation' => 'OR',
-						[
-							'key' => 'wpab_control_page',
-							'value' => $currentPageId,
-							'compare' => '='
-						],
-						[
-							'key' => 'wpab_hypothesis_page',
-							'value' => $currentPageId,
-							'compare' => '='
-						]
-					],
-					[
-						'relation' => 'OR',
-						[
-							'key' => 'wpab_completed',
-							'value' => 1,
-							'compare' => '!='
-						],
-						[
-							'key' => 'wpab_completed',
-							'compare' => 'NOT EXISTS'
-						]
-					]
-				],
-				'tempered_query' => true
-			]);
-
-			echo 'opa';exit;
-			self::$ignorePrePost = false;
-
-
-			if($queryTest->have_posts()){
-				$testPost = $queryTest->next_post();
-
-				$postsTableName = $wpdb->prefix . 'posts';
-				$executionsTableName = $wpdb->prefix . 'wpab_executions';
-
-				$testQuantity = WPAB_get_test_quantity($testPost->ID);
-				$testRuns = WPAB_get_total_runs($testPost->ID);
-
-				$controlPage = WPAB_get_control($testPost->ID);
-				$hypotesisPage = WPAB_get_hypothesis($testPost->ID);
-
-				if($testRuns >= $testQuantity){
-					self::$frontPageId = $controlPage;
-					return self::$frontPageId;
-				}
-
-				$test_subjects = [$controlPage, $hypotesisPage];
-				$subjectsCondition = implode(',', $test_subjects);
-
-				$sortQuery = <<<SQL
-SELECT p.ID, COUNT(e.subject_id) AS occurrences FROM {$postsTableName} AS p LEFT JOIN {$executionsTableName} AS e ON (p.ID = e.subject_id) WHERE p.ID IN ({$subjectsCondition}) GROUP BY e.subject_id ORDER BY occurrences ASC LIMIT 1;
-SQL;
-
-				$sortResult = $wpdb->get_col($sortQuery);
-				$sortedPostId = array_shift($sortResult);
-
-				self::$frontPageId = $sortedPostId;
-				return self::$frontPageId;
-			}
-		}
-
-		return $defaultValue;
-	}
 
 	public static function the_post(WP_Post $post, WP_Query $query)
 	{
