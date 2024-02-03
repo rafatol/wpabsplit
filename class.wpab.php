@@ -9,6 +9,8 @@ class WpAbSplit {
     static $initialized = false;
     static $adminInitialized = false;
 
+    static $splitInjected = false;
+
     public static function init()
     {
         if(!self::$initialized){
@@ -361,7 +363,7 @@ SQL;
 
 	public static function the_post(WP_Post $post, WP_Query $query)
 	{
-		if(isset($query->query_vars['tempered_query'])){
+		if(isset($query->query_vars['tempered_query']) || self::ignoreThisRequest()){
 			return;
 		}
 
@@ -389,7 +391,7 @@ SQL;
 
     public static function pre_get_posts($wp)
     {
-        if(is_singular() && !isset($wp->query_vars['tempered_query'])){
+        if(is_singular() && !isset($wp->query_vars['tempered_query']) && !self::ignoreThisRequest()){
 			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] == WPAB_POST_TYPE){
 				$queryArgs = [
 					'name' => $wp->query_vars['name'],
@@ -1060,5 +1062,10 @@ SQL;
 
 		update_option('page_on_front', $controlPageId);
 	}
+
+    private static function ignoreThisRequest()
+    {
+        return isset($_GET['xlink']);
+    }
 
 }
