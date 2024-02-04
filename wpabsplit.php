@@ -44,7 +44,7 @@ add_action('save_post', [WpAbSplit::class, 'save_post']);
 
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
 
-add_action('the_post', [WpAbSplit::class, 'the_post'], 10, 2);
+//add_action('the_post', [WpAbSplit::class, 'the_post'], 10, 2);
 add_action('pre_get_posts', [WpAbSplit::class, 'pre_get_posts']);
 
 add_action('admin_menu', [WpAbSplit::class, 'admin_menu']);

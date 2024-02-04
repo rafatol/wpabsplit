@@ -411,6 +411,31 @@ SQL;
 				}
 			}
 
+            if(is_front_page() && $wp->query_vars['post_type'] == 'page' && is_numeric($wp->query_vars['post_parent'])){
+                $currentPageId = $wp->query_vars['post_parent'];
+
+                $showOnFront = get_option('show_on_front');
+                $pageOnFront = get_option('page_on_front');
+
+                if($showOnFront == 'page' && $pageOnFront == $currentPageId){
+                    $queryTest = self::queryTestPost($currentPageId);
+
+                    if($queryTest->have_posts()){
+                        $testPost = $queryTest->next_post();
+
+                        $sortedPostId = self::prepareTestSubject($testPost, true);
+
+                        if(false === $sortedPostId){
+                            return $wp;
+                        }
+
+                        self::testPostLoad($testPost->ID, $currentPageId);
+                    }
+                }
+
+                return $wp;
+            }
+
 			if((!isset($wp->query_vars['post_type']) || (isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL)) && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
 				$currentPageId = $wp->queried_object->ID;
 
@@ -958,7 +983,7 @@ SQL;
 		]);
 	}
 
-	private static function prepareTestSubject(WP_Post $post)
+	private static function prepareTestSubject(WP_Post $post, $fromStaticPage = false)
 	{
 		global $wpdb;
 
@@ -994,7 +1019,11 @@ SQL;
 		/** Flag indicando situação final */
 		update_post_meta($post->ID, 'wpab_completed', (($testRuns + 1 >= $testQuantity)?1:0));
 
-		self::updateStaticPage($controlPage, $hypotesisPage, $sortedPostId);
+        if(!$fromStaticPage){
+		    self::updateStaticPage($controlPage, $hypotesisPage, $sortedPostId);
+        } else {
+		    self::updateStaticPage($controlPage, $hypotesisPage, get_option('page_on_front'));
+        }
 
 		return $sortedPostId;
 	}
