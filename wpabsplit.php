@@ -44,7 +44,6 @@ add_action('save_post', [WpAbSplit::class, 'save_post']);
 
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
 
-//add_action('the_post', [WpAbSplit::class, 'the_post'], 10, 2);
 add_action('pre_get_posts', [WpAbSplit::class, 'pre_get_posts']);
 
 add_action('admin_menu', [WpAbSplit::class, 'admin_menu']);
@@ -65,6 +64,7 @@ add_action('restrict_manage_posts', [WpAbSplit::class, 'restrict_manage_posts'])
 add_filter('parse_query', [WpAbSplit::class, 'parse_query']);
 
 add_filter('views_edit-wpab_test', [WpAbSplit::class, 'views_edit_wpab_test']);
+add_filter('pre_option_page_on_front', [WpAbSplit::class, 'pre_option_page_on_front']);
 
 function WPAB_get_test_subjects($post_id)
 {

@@ -361,38 +361,10 @@ SQL;
 		}
     }
 
-	public static function the_post(WP_Post $post, WP_Query $query)
-	{
-		if(isset($query->query_vars['tempered_query']) || self::ignoreThisRequest()){
-			return;
-		}
-
-		if(is_front_page() && $post->post_type == 'page'){
-			$showOnFront = get_option('show_on_front');
-			$pageOnFront = get_option('page_on_front');
-
-			if($showOnFront == 'page' && $pageOnFront == $post->ID){
-				$queryTest = self::queryTestPost($post->ID);
-
-				if($queryTest->have_posts()){
-					$testPost = $queryTest->next_post();
-
-					$sortedPostId = self::prepareTestSubject($testPost);
-
-					if(false === $sortedPostId){
-						return;
-					}
-
-					self::testPostLoad($testPost->ID, $post->ID);
-				}
-			}
-		}
-	}
-
     public static function pre_get_posts($wp)
     {
-        if(is_singular() && !isset($wp->query_vars['tempered_query']) && !self::ignoreThisRequest()){
-			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] == WPAB_POST_TYPE){
+        if(is_singular() && !is_admin() && !isset($wp->query_vars['tempered_query'])){
+			if(isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] == WPAB_POST_TYPE && !self::ignoreThisRequest()){
 				$queryArgs = [
 					'name' => $wp->query_vars['name'],
 					'post_type' => WPAB_POST_TYPE,
@@ -411,13 +383,14 @@ SQL;
 				}
 			}
 
-            if(is_front_page() && $wp->query_vars['post_type'] == 'page' && is_numeric($wp->query_vars['post_parent'])){
+            if(is_front_page() && $wp->query_vars['post_type'] == 'page' && is_numeric($wp->query_vars['post_parent']) && !self::ignoreThisRequest()){
                 $currentPageId = $wp->query_vars['post_parent'];
 
                 $showOnFront = get_option('show_on_front');
                 $pageOnFront = get_option('page_on_front');
 
                 if($showOnFront == 'page' && $pageOnFront == $currentPageId){
+					delete_option('page_on_front_style');
                     $queryTest = self::queryTestPost($currentPageId);
 
                     if($queryTest->have_posts()){
@@ -426,10 +399,13 @@ SQL;
                         $sortedPostId = self::prepareTestSubject($testPost, true);
 
                         if(false === $sortedPostId){
+							update_option('page_on_front', WPAB_get_control($testPost->ID));
+
                             return $wp;
                         }
 
                         self::testPostLoad($testPost->ID, $currentPageId);
+						update_option('page_on_front_style', $currentPageId);
                     }
                 }
 
@@ -444,6 +420,17 @@ SQL;
 				if($queryTest->have_posts()){
 					$testPost = $queryTest->next_post();
 
+					if(self::ignoreThisRequest()){
+						$postStyleId = get_post_meta($testPost->ID, 'wpab_post_style', true);
+
+						$wp->queried_object = get_post($postStyleId);
+						$wp->queried_object_id = $postStyleId;
+
+						return $wp;
+					}
+
+					delete_post_meta($testPost->ID, 'wpab_post_style');
+
 					$controlPage = WPAB_get_control($testPost->ID);
 
 					$sortedPostId = self::prepareTestSubject($testPost);
@@ -455,6 +442,7 @@ SQL;
 						return $wp;
 					}
 
+					update_post_meta($testPost->ID, 'wpab_post_style', $sortedPostId);
 					self::testPostLoad($testPost->ID, $sortedPostId);
 
 					$wp->queried_object = get_post($sortedPostId);
@@ -1082,19 +1070,48 @@ SQL;
 		if(null !== $sortedValue){
 			if($sortedValue == $controlPageId){
 				update_option('page_on_front', $hypotesisPageId);
+				update_option('page_on_front_style', $controlPageId);
+
 				return;
 			}
 
 			update_option('page_on_front', $controlPageId);
+			update_option('page_on_front_style', $hypotesisPageId);
 			return;
 		}
 
 		update_option('page_on_front', $controlPageId);
+		delete_option('page_on_front_style');
 	}
 
     private static function ignoreThisRequest()
     {
         return isset($_GET['xlink']);
     }
+
+	public static function pre_option_page_on_front()
+	{
+		if(self::ignoreThisRequest()){
+			$optionValue = get_option('page_on_front_style');
+
+			if(is_numeric($optionValue)){
+				return $optionValue;
+			}
+		}
+
+		global $wpdb;
+
+		$optionQuery = <<<SQL
+SELECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'page_on_front';
+SQL;
+
+		$optionValue = $wpdb->get_var($optionQuery);
+
+		if(is_numeric($optionValue)){
+			return $optionValue;
+		}
+
+		return false;
+	}
 
 }
