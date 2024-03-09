@@ -11,7 +11,7 @@ use WpAbSplit\LicenseException as LicenseException;
 Plugin Name:  WP A/B Split
 Plugin URI:   https://wpabsplit.com
 Description:  Turning Traffic into Conversions, One Test at a Time!
-Version:      0.1.0
+Version:      0.1.2
 Author:       WP A/B Split
 Author URI:   https://wpabsplit.com
 License:      GPL2
@@ -25,7 +25,7 @@ if(!function_exists('add_action')){
     exit;
 }
 
-define('WPAB_VERSION', '0.1.0');
+define('WPAB_VERSION', '0.1.2');
 define('WPAB_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 define('WPAB_POST_TYPE', 'wpab_test');
@@ -72,6 +72,7 @@ add_action('restrict_manage_posts', [WpAbSplit::class, 'restrict_manage_posts'])
 add_filter('parse_query', [WpAbSplit::class, 'parse_query']);
 
 add_filter('views_edit-wpab_test', [WpAbSplit::class, 'views_edit_wpab_test']);
+add_filter('pre_option_page_on_front', [WpAbSplit::class, 'pre_option_page_on_front']);
 
 function WPAB_get_test_subjects($post_id)
 {
