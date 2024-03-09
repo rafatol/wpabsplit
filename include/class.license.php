@@ -5,8 +5,8 @@ namespace WpAbSplit;
 class License
 {
 
-    const MOTHERSHIP = 'http://cometex/wplicense';
-    const SECRET_KEY = '65ac8a545ceb07.29393020';
+    const MOTHERSHIP = 'https://wpabsplit.com';
+    const SECRET_KEY = '65e7dd75a536b2.72168865';
 
     const LICENSE_KEY = 'wpabsplit_license_key';
     const LICENSE_DATA = 'wpabsplit_license_data';
