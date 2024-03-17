@@ -310,21 +310,21 @@ SQL;
         global $post;
 
         if(in_array($hook, ['post-new.php', 'post.php']) && $post && $post->post_type == WPAB_POST_TYPE){
-            wp_enqueue_style('wpab-admin-toast-css', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.css', [], '1.3.2');
-            wp_enqueue_script('wpab-admin-toast-js', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.js', ['jquery'], '1.3.2', true);
+            wp_enqueue_style('wpab-admin-toast-css', WPAB_PLUGIN_URL . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.css', [], '1.3.2');
+            wp_enqueue_script('wpab-admin-toast-js', WPAB_PLUGIN_URL. 'assets/plugins/jquery-toast-plugin/jquery.toast.min.js', ['jquery'], '1.3.2', true);
 
-            wp_enqueue_style('wpab-admin-select2-css', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-select2/css/select2.min.css', [], '4.1.0');
-            wp_enqueue_script('wpab-admin-select2-js', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-select2/js/select2.full.min.js', ['jquery'], '4.1.0', true);
+            wp_enqueue_style('wpab-admin-select2-css', WPAB_PLUGIN_URL . 'assets/plugins/jquery-select2/css/select2.min.css', [], '4.1.0');
+            wp_enqueue_script('wpab-admin-select2-js', WPAB_PLUGIN_URL . 'assets/plugins/jquery-select2/js/select2.full.min.js', ['jquery'], '4.1.0', true);
 
             $currentLocale = get_locale();
             $currentLocale = str_replace('_', '-', $currentLocale);
 
-            if(file_exists(plugin_dir_path(__FILE__) . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js")){
-                wp_enqueue_script('wpab-admin-select2-i18n-js', plugin_dir_url(__FILE__) . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js", ['wpab-admin-select2-js'], '4.1.0', true);
+            if(file_exists(WPAB_PLUGIN_PATH . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js")){
+                wp_enqueue_script('wpab-admin-select2-i18n-js', WPAB_PLUGIN_URL . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js", ['wpab-admin-select2-js'], '4.1.0', true);
             }
 
-            wp_enqueue_style('wpab-admin-style', plugin_dir_url(__FILE__) . 'assets/admin-stylesheet.css', [], WPAB_VERSION);
-            wp_enqueue_script('wpab-admin-script', plugin_dir_url(__FILE__) . 'assets/admin-scripts.js', ['jquery'], WPAB_VERSION, true);
+            wp_enqueue_style('wpab-admin-style', WPAB_PLUGIN_URL . 'assets/admin-stylesheet.css', [], WPAB_VERSION);
+            wp_enqueue_script('wpab-admin-script', WPAB_PLUGIN_URL . 'assets/admin-scripts.js', ['jquery'], WPAB_VERSION, true);
 
 			if(isset($_GET['post'])){
 				$sidebarVars = [
@@ -342,19 +342,18 @@ SQL;
         }
 
 		if($hook == 'edit.php' && $post && $post->post_type == WPAB_POST_TYPE){
-            wp_enqueue_style('wpab-admin-posts-style', plugin_dir_url(__FILE__) . 'assets/admin-posts-stylesheet.css', [], WPAB_VERSION);
-            wp_enqueue_script('wpab-admin-posts-script', plugin_dir_url(__FILE__) . 'assets/admin-posts-scripts.js', ['jquery'], WPAB_VERSION, true);
+            wp_enqueue_style('wpab-admin-posts-style', WPAB_PLUGIN_URL . 'assets/admin-posts-stylesheet.css', [], WPAB_VERSION);
+            wp_enqueue_script('wpab-admin-posts-script', WPAB_PLUGIN_URL . 'assets/admin-posts-scripts.js', ['jquery'], WPAB_VERSION, true);
 		}
 
         if($hook == 'settings_page_wpab_settings'){
-            wp_enqueue_style('wpab-admin-settings-style', plugin_dir_url(__FILE__) . 'assets/admin-settings.css', [], WPAB_VERSION);
+            wp_enqueue_style('wpab-admin-settings-style', WPAB_PLUGIN_URL . 'assets/admin-settings.css', [], WPAB_VERSION);
         }
 
-
 		if($hook == 'admin_page_wpab_report'){
-			wp_enqueue_style('wpab-admin-report-style', plugin_dir_url(__FILE__) . 'assets/admin-report-stylesheet.css', [], WPAB_VERSION);
-			wp_enqueue_script('wpab-admin-report-script', plugin_dir_url(__FILE__) . 'assets/admin-report-scripts.js', ['jquery'], WPAB_VERSION, true);
-			wp_enqueue_script('canvasjs-chart', plugin_dir_url(__FILE__) . 'assets/plugins/canvasjs-chart/canvasjs.min.js', ['wpab-admin-report-script'], WPAB_VERSION, true);
+			wp_enqueue_style('wpab-admin-report-style', WPAB_PLUGIN_URL . 'assets/admin-report-stylesheet.css', [], WPAB_VERSION);
+			wp_enqueue_script('wpab-admin-report-script', WPAB_PLUGIN_URL . 'assets/admin-report-scripts.js', ['jquery'], WPAB_VERSION, true);
+			wp_enqueue_script('canvasjs-chart', WPAB_PLUGIN_URL . 'assets/plugins/canvasjs-chart/canvasjs.min.js', ['wpab-admin-report-script'], WPAB_VERSION, true);
 
 			$sidebarVars = [
 				'custom_menu' => [
@@ -433,7 +432,7 @@ SQL;
                 return $wp;
             }
 
-			if((!isset($wp->query_vars['post_type']) || (isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL)) && $wp->queried_object instanceof WP_Post && $wp->queried_object->post_type == 'page'){
+			if((!isset($wp->query_vars['post_type']) || (isset($wp->query_vars['post_type']) && $wp->query_vars['post_type'] === NULL)) && $wp->queried_object instanceof \WP_Post && $wp->queried_object->post_type == 'page'){
 				$currentPageId = $wp->queried_object->ID;
 
 				$queryTest = self::queryTestPost($currentPageId);
@@ -577,7 +576,7 @@ SQL;
 	public static function report()
 	{
 		if(isset($_GET['page']) && $_GET['page'] == 'completed'){
-			$tests = new WP_Query([
+			$tests = new \WP_Query([
 				'post_type' => WPAB_POST_TYPE,
 				'posts_per_page' => -1,
 				'post_status' => 'publish',
@@ -693,6 +692,8 @@ SQL;
 						}
 
                         if(!$subjectData['conversion']){
+	                        $resultArray[$platform][$subject]['conversion_rate'] = 0;
+
                             $emptyData++;
                             continue;
                         }
@@ -773,7 +774,7 @@ SELECT end_datetime FROM {$executionsTableName} WHERE test_id = {$post->ID} ORDE
 SQL;
 
 					$lastRunDateResult = $wpdb->get_row($lastRunDateQuery);
-					$lastRunDateResult = new DateTime($lastRunDateResult->end_datetime);
+					$lastRunDateResult = new \DateTime($lastRunDateResult->end_datetime);
 				}
 
 				include WPAB_PLUGIN_PATH . 'templates/admin_page/report.php';
@@ -968,7 +969,7 @@ SQL;
 
 	private static function queryTestPost($postId)
 	{
-		return new WP_Query([
+		return new \WP_Query([
 			'post_type' => WPAB_POST_TYPE,
 			'posts_per_page' => 1,
 			'post_status' => 'publish',
@@ -1006,7 +1007,7 @@ SQL;
 		]);
 	}
 
-	private static function prepareTestSubject(WP_Post $post, $fromStaticPage = false)
+	private static function prepareTestSubject(\WP_Post $post, $fromStaticPage = false)
 	{
 		global $wpdb;
 
@@ -1060,7 +1061,7 @@ SQL;
 		/** MobileDetect */
 		require_once WPAB_PLUGIN_PATH . 'trd_party/Mobile_Detect.php';
 
-		$mobileDetect = new Mobile_Detect();
+		$mobileDetect = new \Mobile_Detect();
 
 		$clientPlatform = WPAB_PLATFORM_LARGE;
 		$clientUserAgent = $mobileDetect->getUserAgent();
@@ -1073,7 +1074,7 @@ SQL;
 			$clientPlatform = WPAB_PLATFORM_MEDIUM;
 		}
 
-		wp_enqueue_script('wpab-job', plugin_dir_url(__FILE__) . 'assets/wpab-job.js', ['jquery'], WPAB_VERSION, true);
+		wp_enqueue_script('wpab-job', WPAB_PLUGIN_URL . 'assets/wpab-job.js', ['jquery'], WPAB_VERSION, true);
 
 		$pluginVars = ['id' => uniqid('wpab_', true), 'test_id' => $testId, 'subject_id' => $subjectId, 'probe_url' => admin_url('admin-ajax.php'), 'triggers' => []];
 

@@ -134,11 +134,11 @@ class License
             throw new \Exception('Error contacting license server');
         }
 
-        $licenseData = json_decode(wp_remote_retrieve_body($response));
+	    $response = json_decode(wp_remote_retrieve_body($response));
 
         if($response->result == 'success'){
             update_option(md5($licenseKey), date('Y-m-d'));
-            update_option(self::LICENSE_DATA, $licenseData);
+            update_option(self::LICENSE_DATA, $response);
 
             return true;
         }
