@@ -27,6 +27,7 @@ if(!function_exists('add_action')){
 
 define('WPAB_VERSION', '0.1.2');
 define('WPAB_PLUGIN_PATH', plugin_dir_path(__FILE__));
+define('WPAB_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 define('WPAB_POST_TYPE', 'wpab_test');
 define('WPAB_NONCE_KEY', 'wpab_nonce');

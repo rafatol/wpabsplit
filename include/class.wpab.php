@@ -250,8 +250,27 @@ SQL;
     public static function create_test_control()
     {
         global $post;
+        global $wpdb;
 
-        $pages = get_pages();
+        $pagesToExcludeQuery = <<<SQL
+SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id <> {$post->ID} AND ((meta_key = 'wpab_control_page') OR (meta_key = 'wpab_hypothesis_page')) AND post_id NOT IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'wpab_completed' AND meta_value = 1);
+SQL;
+
+        $pagesToExclude = array();
+        $pagesToExcludeResult = $wpdb->get_results($pagesToExcludeQuery, ARRAY_A);
+
+        if(count($pagesToExcludeResult)){
+            foreach($pagesToExcludeResult as $pageInfo){
+                $pagesToExclude[] = $pageInfo['meta_value'];
+            }
+        }
+
+        $pagesToExclude = array_unique($pagesToExclude);
+
+        $pages = get_pages(array(
+            'exclude' => $pagesToExclude
+        ));
+
         $selected_page = WPAB_get_control($post->ID);
 
         $can_edit = !WPAB_test_started($post->ID);
@@ -310,21 +329,21 @@ SQL;
         global $post;
 
         if(in_array($hook, ['post-new.php', 'post.php']) && $post && $post->post_type == WPAB_POST_TYPE){
-            wp_enqueue_style('wpab-admin-toast-css', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.css', [], '1.3.2');
-            wp_enqueue_script('wpab-admin-toast-js', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.js', ['jquery'], '1.3.2', true);
+            wp_enqueue_style('wpab-admin-toast-css', WPAB_PLUGIN_URL . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.css', [], '1.3.2');
+            wp_enqueue_script('wpab-admin-toast-js', WPAB_PLUGIN_URL . 'assets/plugins/jquery-toast-plugin/jquery.toast.min.js', ['jquery'], '1.3.2', true);
 
-            wp_enqueue_style('wpab-admin-select2-css', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-select2/css/select2.min.css', [], '4.1.0');
-            wp_enqueue_script('wpab-admin-select2-js', plugin_dir_url(__FILE__) . 'assets/plugins/jquery-select2/js/select2.full.min.js', ['jquery'], '4.1.0', true);
+            wp_enqueue_style('wpab-admin-select2-css', WPAB_PLUGIN_URL . 'assets/plugins/jquery-select2/css/select2.min.css', [], '4.1.0');
+            wp_enqueue_script('wpab-admin-select2-js', WPAB_PLUGIN_URL . 'assets/plugins/jquery-select2/js/select2.full.min.js', ['jquery'], '4.1.0', true);
 
             $currentLocale = get_locale();
             $currentLocale = str_replace('_', '-', $currentLocale);
 
             if(file_exists(plugin_dir_path(__FILE__) . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js")){
-                wp_enqueue_script('wpab-admin-select2-i18n-js', plugin_dir_url(__FILE__) . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js", ['wpab-admin-select2-js'], '4.1.0', true);
+                wp_enqueue_script('wpab-admin-select2-i18n-js', WPAB_PLUGIN_URL . "assets/plugins/jquery-select2/js/i18n/{$currentLocale}.js", ['wpab-admin-select2-js'], '4.1.0', true);
             }
 
-            wp_enqueue_style('wpab-admin-style', plugin_dir_url(__FILE__) . 'assets/admin-stylesheet.css', [], WPAB_VERSION);
-            wp_enqueue_script('wpab-admin-script', plugin_dir_url(__FILE__) . 'assets/admin-scripts.js', ['jquery'], WPAB_VERSION, true);
+            wp_enqueue_style('wpab-admin-style', WPAB_PLUGIN_URL . 'assets/admin-stylesheet.css', [], WPAB_VERSION);
+            wp_enqueue_script('wpab-admin-script', WPAB_PLUGIN_URL . 'assets/admin-scripts.js', ['jquery'], WPAB_VERSION, true);
 
 			if(isset($_GET['post'])){
 				$sidebarVars = [
@@ -515,11 +534,27 @@ SQL;
 
     public static function probe()
     {
+        global $wpdb;
+
         if(isset($_GET['method']) && $_GET['method'] == 'hypothesis'){
-            $selectedPage = $_GET['page_id'];
+            $pagesToExcludeQuery = <<<SQL
+SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id <> {$_GET['current_id']} AND ((meta_key = 'wpab_control_page') OR (meta_key = 'wpab_hypothesis_page')) AND post_id NOT IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'wpab_completed' AND meta_value = 1);
+SQL;
+
+            $pagesToExclude = array();
+            $pagesToExcludeResult = $wpdb->get_results($pagesToExcludeQuery, ARRAY_A);
+
+            if(count($pagesToExcludeResult)){
+                foreach($pagesToExcludeResult as $pageInfo){
+                    $pagesToExclude[] = $pageInfo['meta_value'];
+                }
+            }
+
+            $pagesToExclude[] = $_GET['page_id'];
+            $pagesToExclude = array_unique($pagesToExclude);
 
             $pagesArgs = [
-                'exclude' => [$selectedPage]
+                'exclude' => $pagesToExclude
             ];
 
             $pages = get_pages($pagesArgs);
@@ -539,8 +574,6 @@ SQL;
         }
 
         if(isset($_POST['user_id']) && isset($_POST['userAction'])){
-            global $wpdb;
-
             $stepTableName = $wpdb->prefix . 'wpab_steps';
 
             $stepName = $_POST['userAction'];
