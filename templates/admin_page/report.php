@@ -14,8 +14,8 @@
                 <div class="col">
                     <p><?=__('This report shows the results of your A/B test. The test was conducted on the following pages:')?></p>
                     <ul>
-                        <li><span class="color-preview control-bkg"></span> <strong><?=__('Control page')?></strong>: <?=sprintf('%s (%s)', $controlPost->post_title, get_permalink($controlPost))?></li>
-                        <li><span class="color-preview challenger-bkg"></span> <strong><?=__('Challenger page')?></strong>: <?=sprintf('%s (%s)', $challengerPort->post_title, get_permalink($challengerPort))?></li>
+                        <li><span class="color-preview control-bkg"></span> <strong><?=__('Control page')?></strong>: <?=sprintf('%s (%s)', $controlPageTitle, $controlPageUrl)?></li>
+                        <li><span class="color-preview challenger-bkg"></span> <strong><?=__('Challenger page')?></strong>: <?=sprintf('%s (%s)', $challengerPageTitle, $challengerPageUrl)?></li>
                     </ul>
 <?php
                 if($totalRuns):

@@ -161,6 +161,11 @@ SQL;
 
         if(isset($_POST['wpab_control_page']) && $can_edit){
             update_post_meta($post_id, 'wpab_control_page', $_POST['wpab_control_page']);
+
+            $controlPage = get_post($_POST['wpab_control_page']);
+
+            update_post_meta($post_id, 'wpab_control_page_title', $controlPage->post_title);
+            update_post_meta($post_id, 'wpab_control_page_url', get_permalink($controlPage));
         }
 
 	    if(isset($_POST['wpab_control_page_color']) && $can_edit){
@@ -169,6 +174,11 @@ SQL;
 
         if(isset($_POST['wpab_hypothesis_page']) && $can_edit){
             update_post_meta($post_id, 'wpab_hypothesis_page', $_POST['wpab_hypothesis_page']);
+
+            $hypothesisPage = get_post($_POST['wpab_hypothesis_page']);
+
+            update_post_meta($post_id, 'wpab_hypothesis_page_title', $hypothesisPage->post_title);
+            update_post_meta($post_id, 'wpab_hypothesis_page_url', get_permalink($hypothesisPage));
         }
 
         if(isset($_POST['wpab_hypothesis_page_color']) && $can_edit){
@@ -624,7 +634,6 @@ SQL;
 				]
 			]);
 
-
 			require WPAB_PLUGIN_PATH . 'templates/admin_page/report_list.php';
 
 			return;
@@ -796,8 +805,26 @@ SQL;
 				wp_localize_script('wpab-admin-report-script', 'wpab_chart_colors', ['control_color' => $controlColor, 'hypotesis_color' => $hypotesisColor]);
 				wp_localize_script('wpab-admin-report-script', 'wpab_chart_data', $chartData);
 
-				$controlPost = get_post($controlPageId);
-				$challengerPort = get_post($challengerPageId);
+                $controlPage = get_post(WPAB_get_control($post->ID));
+
+                if($controlPage){
+                    $controlPageTitle = $controlPage->post_title;
+                    $controlPageUrl = get_permalink($controlPage);
+                } else {
+                    $controlPageTitle = get_post_meta($postId, 'wpab_control_page_title', true);
+                    $controlPageUrl = get_post_meta($postId, 'wpab_control_page_url', true);
+                }
+
+
+                $hypotesisPage = get_post(WPAB_get_hypothesis($post->ID));
+
+                if($hypotesisPage){
+                    $challengerPageTitle = $hypotesisPage->post_title;
+                    $challengerPageUrl = get_permalink($hypotesisPage);
+                } else {
+                    $challengerPageTitle = get_post_meta($postId, 'wpab_hypothesis_page_title', true);
+                    $challengerPageUrl = get_post_meta($postId, 'wpab_hypothesis_page_url', true);
+                }
 
 				$totalRuns = WPAB_get_total_runs($post->ID);
 
