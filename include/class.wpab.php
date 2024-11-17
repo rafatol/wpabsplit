@@ -142,6 +142,31 @@ SQL;
     public static function save_post($post_id)
     {
         if(WPAB_POST_TYPE != get_post_type($post_id)){
+            global $wpdb;
+
+            // verifica se o post salvo é um challenger ou hypothesis de um teste
+            $query = <<<SQL
+SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ('wpab_control_page', 'wpab_hypothesis_page') AND meta_value = {$post_id};
+SQL;
+
+            $testPostId = $wpdb->get_var($query);
+
+            if($testPostId){
+                $controlPage = get_post(WPAB_get_control($testPostId));
+                $hypothesisPage = get_post(WPAB_get_hypothesis($testPostId));
+
+                if($controlPage){
+                    update_post_meta($testPostId, 'wpab_control_page_title', $controlPage->post_title);
+                    update_post_meta($testPostId, 'wpab_control_page_url', get_permalink($controlPage));
+                }
+
+                if($hypothesisPage){
+                    update_post_meta($testPostId, 'wpab_hypothesis_page_title', $hypothesisPage->post_title);
+                    update_post_meta($testPostId, 'wpab_hypothesis_page_url', get_permalink($hypothesisPage));
+                }
+            }
+
+
             return $post_id;
         }
 
