@@ -1,0 +1,2 @@
+.form-group.with-icon{position:relative;display:inline-block;}
+.form-group.with-icon i{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:green;}
