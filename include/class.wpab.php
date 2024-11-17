@@ -241,6 +241,33 @@ SQL;
         return $post_id;
     }
 
+    public static function user_has_cap($allcaps, $caps, $args)
+    {
+        global $wpdb;
+        if(isset($args[0]) && isset($args[2]) && $args[0] == 'delete_post'){
+            $post = get_post($args[2]);
+            if($post->post_status == 'publish' && $post->post_type == 'page'){
+                $query = <<<SQL
+SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ('wpab_control_page', 'wpab_hypothesis_page') AND meta_value = {$post->ID};
+SQL;
+
+                $testPostIds = $wpdb->get_col($query);
+
+                if($testPostIds) {
+                    foreach ($testPostIds as $testPostId) {
+                        $isCompleted = get_post_meta($testPostId, 'wpab_completed', true);
+
+                        if(!$isCompleted){
+                            $allcaps[$caps[0]] = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $allcaps;
+    }
+
     public static function add_custom_post_type()
     {
         // Register Custom Post Type

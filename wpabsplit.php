@@ -50,6 +50,8 @@ add_action('admin_init', [WpAbSplit::class, 'admin_init']);
 add_action('admin_notices', [WpAbSplit::class, 'admin_notices']);
 add_action('save_post', [WpAbSplit::class, 'save_post']);
 
+add_filter('user_has_cap', [WpAbSplit::class, 'user_has_cap'], 10, 3);
+
 add_action('admin_enqueue_scripts', [WpAbSplit::class, 'admin_enqueue_scripts']);
 
 add_action('pre_get_posts', [WpAbSplit::class, 'pre_get_posts']);
