@@ -6,6 +6,7 @@
 use WpAbSplit\WpAbSplit as WpAbSplit;
 use WpAbSplit\Licence as Licence;
 use WpAbSplit\LicenseException as LicenseException;
+use WpAbSplit\Updater as Updater;
 
 /**
 Plugin Name:  WP A/B Split
@@ -26,6 +27,7 @@ if(!function_exists('add_action')){
 }
 
 define('WPAB_VERSION', '0.1.2');
+define('WPAB_PLUGIN_SLUG', 'wpabsplit');
 define('WPAB_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('WPAB_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -40,6 +42,7 @@ define('WPAB_SESSION_NAME', 'wpab_session');
 
 require_once WPAB_PLUGIN_PATH . 'include/class.wpab.php';
 require_once WPAB_PLUGIN_PATH . 'include/class.license.php';
+require_once WPAB_PLUGIN_PATH . 'include/class.updater.php';
 require_once WPAB_PLUGIN_PATH . 'include/class.exception.php';
 
 register_activation_hook(__FILE__, [WpAbSplit::class, 'plugin_activation']);
@@ -76,6 +79,9 @@ add_filter('parse_query', [WpAbSplit::class, 'parse_query']);
 
 add_filter('views_edit-wpab_test', [WpAbSplit::class, 'views_edit_wpab_test']);
 add_filter('pre_option_page_on_front', [WpAbSplit::class, 'pre_option_page_on_front']);
+
+add_filter('plugins_api', [Updater::class, 'plugin_info'], 20, 3);
+add_filter('site_transient_update_plugins', [Updater::class, 'plugin_update']);
 
 function WPAB_get_test_subjects($post_id)
 {
