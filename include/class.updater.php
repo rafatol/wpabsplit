@@ -8,7 +8,7 @@ class Updater
     /**
      * URL to the mother ship
      */
-    const MOTHERSHIP = 'http://cometex/wplicense/wp-content/plugins/socrates/updater/info.json';
+    const MOTHERSHIP = 'https://wpabsplit.com/wp-content/plugins/socrates/updater/info.json';
 
 
     public static function plugin_info($res, $action, $args)
