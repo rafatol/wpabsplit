@@ -54,19 +54,7 @@ CREATE TABLE {$executionsTableName} (
   `end_datetime` DATETIME NULL,
   `test_id` BIGINT UNSIGNED NULL,
   `subject_id` BIGINT UNSIGNED NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_execution_test_idx` (`test_id`),
-  INDEX `fk_execution_subject_idx` (`subject_id`),
-  CONSTRAINT `fk_execution_test`
-    FOREIGN KEY (`test_id`)
-    REFERENCES `{$wpdb->prefix}posts` (`ID`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_execution_subject`
-    FOREIGN KEY (`subject_id`)
-    REFERENCES `{$wpdb->prefix}posts` (`ID`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE) {$charset_collate};
+  PRIMARY KEY (`id`)) {$charset_collate};
 SQL;
 
         /**
