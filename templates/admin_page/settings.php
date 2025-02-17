@@ -6,14 +6,21 @@
     if(\WpAbSplit\License::isActivated()):
         $isActivated = true;
 ?>
-        <p><?=__('Your <strong>WP A/B Split</strong> license is active. To deactivate it, simply remove the license in the field below and click "Save Changes".')?></p>
+        <div class="notice notice-info">
+            <p><?=__('Your <strong>WP A/B Split</strong> license is active. To deactivate it, simply remove the license in the field below and click "Save Changes".')?></p>
+        </div>
 <?php
     else:
 ?>
-        <p><?=__('You do not have a valid license to use <strong>WP A/B Split</strong>. Please access our website and purchase a license. If you already have one, enter it in the field below and click "Save Changes".')?></p>
+        <div class="notice notice-error">
+            <p><?=__('You do not have a valid license to use <strong>WP A/B Split</strong>. Please access our website and purchase a license. If you already have one, enter it in the field below and click "Save Changes".')?></p>
+        </div>
 <?php
     endif;
 ?>
+        <div class="notice notice-info">
+            <p><?=sprintf(__('Do you have any questions about how to use the plugin? <a href="%s" target="_blank">Check out our quick guide!</a>'), 'https://wpabsplit.com/docs/')?></p>
+        </div>
         <table class="form-table">
             <tbody>
                 <tr>

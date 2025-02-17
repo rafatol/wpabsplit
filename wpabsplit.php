@@ -12,7 +12,7 @@ use WpAbSplit\Updater as Updater;
 Plugin Name:  WP A/B Split
 Plugin URI:   https://wpabsplit.com
 Description:  Turning Traffic into Conversions, One Test at a Time!
-Version:      0.1.4
+Version:      0.1.5
 Author:       WP A/B Split
 Author URI:   https://wpabsplit.com
 License:      GPL2
@@ -26,7 +26,7 @@ if(!function_exists('add_action')){
     exit;
 }
 
-define('WPAB_VERSION', '0.1.4');
+define('WPAB_VERSION', '0.1.5');
 define('WPAB_PLUGIN_SLUG', 'wpabsplit');
 define('WPAB_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('WPAB_PLUGIN_URL', plugin_dir_url(__FILE__));
