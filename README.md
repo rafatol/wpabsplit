@@ -1,13 +1,38 @@
-# Transforme seus resultados com testes A/B fáceis e eficazes!
+# WP AB SPLIT
 
-## Otimize Seu Site e Aumente Suas Vendas com Testes A/B
-Você está lutando para aumentar a conversão do seu site? Se sim, não está sozinho. Agências de marketing e profissionais da web enfrentam o mesmo desafio diariamente. Mas e se houvesse uma maneira simples de otimizar seu desempenho online e maximizar suas vendas, tudo sem complicação?
+**Decisões baseadas em dados, de forma simples.**
 
-## Apresentando o WP AB SPLIT
-Conheça o WP AB SPLIT – o plugin que permite rodar testes A/B de forma fácil e intuitiva. Com ele, você pode criar, conduzir e analisar testes A/B utilizando as ferramentas que você já conhece para desenvolver suas páginas. Não precisa aprender nada novo!
+## 🚀 Visão Geral
 
-## Compatível com as ferramentas que você já usa!
+O **WP AB SPLIT** é um plugin para WordPress que facilita a criação, execução e análise de testes A/B. Ideal para agências de marketing e profissionais da web que buscam otimizar o desempenho de seus sites e maximizar conversões sem complicações.
 
- **Integre com facilidade e comece a testar sem complicações.**
+## 🔧 Recursos Principais
 
- O WP AB SPLIT funciona perfeitamente com qualquer tema e também com os principais page builders para WordPress, como Elementor, Oxygen Builder, etc. Continue utilizando o que você já conhece e domina, sem alterar seu fluxo de trabalho. Fazer testes A/B nunca foi tão simples e natural!
+* **Integração Simples**: Compatível com qualquer tema e principais construtores de páginas como Elementor, Bricks Builder e Oxygen Builder.
+* **Criação Intuitiva de Testes**: Utilize as ferramentas que você já conhece para desenvolver suas páginas de teste.
+* **Análise de Resultados**: Relatórios claros e segmentados por dispositivo (desktop, tablet e mobile) para insights precisos.
+* **Controle Total**: Defina suas próprias amostragens e metodologias de teste.
+* **Privacidade Garantida**: Sem coleta de dados pessoais ou cookies de terceiros, em conformidade com as leis de privacidade.
+
+## 🛠️ Tecnologias Utilizadas
+
+* PHP
+* WordPress
+* Composer
+
+## 📦 Instalação
+
+1. Baixe o arquivo `.zip` mais recente do plugin diretamente pela aba [Releases](https://github.com/rafatol/wpabsplit/releases) do repositório.
+2. No painel administrativo do seu site WordPress, vá em **Plugins > Adicionar novo**.
+3. Clique em **Fazer upload do plugin** e selecione o arquivo `.zip` que você baixou.
+4. Clique em **Instalar agora** e depois em **Ativar plugin**.
+
+## 🧪 Como Usar
+
+1. Após ativar o plugin, acesse o menu "WP AB SPLIT" no painel do WordPress.
+2. Crie um novo teste A/B definindo as variantes desejadas.
+3. Publique o teste e acompanhe os resultados em tempo real.
+
+## 📄 Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
