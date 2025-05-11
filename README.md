@@ -1,11 +1,12 @@
 # WP AB SPLIT
 
-🇺🇸 **Data-driven decisions, made simple.**
-🇧🇷 **Decisões baseadas em dados, de forma simples.**
+🇺🇸 - **Data-driven decisions, made simple.**
+
+🇧🇷 - **Decisões baseadas em dados, de forma simples.**
 
 ---
 
-## 🇺🇸 English Version
+## 🇺🇸 - English Version
 
 ### 🚀 Overview
 
@@ -44,7 +45,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🇧🇷 Versão em Português
+## 🇧🇷 - Versão em Português
 
 ### 🚀 Visão Geral
 
